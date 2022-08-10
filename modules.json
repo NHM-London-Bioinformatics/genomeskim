@@ -6,6 +6,9 @@
             "custom/dumpsoftwareversions": {
                 "git_sha": "e5b44499efcf6f7fb24874886bac60591c5d94dd"
             },
+            "fastp": {
+                "git_sha": "7e8ad566883449e7939062b5e2bcf53fc1e0002f"
+            },
             "fastqc": {
                 "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
             },
