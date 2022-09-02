@@ -8,12 +8,20 @@ class WorkflowGenomeskim {
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-/*         genomeExistsError(params, log)
+        //genomeExistsError(params, log)
 
+        /*
         if (!params.fasta) {
             log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
             System.exit(1)
         } */
+
+        // If fastp adapter trimming has been disabled, passing an adapter fasta is pointless
+        if (params.fastp_disable_adapter_trim & params.fastp_adapter_fasta) {
+            log.error "Fastp adapter fasta file provided to --fastp_adapter_fasta, but fastp has been disabled with --fastp_disable_adapter_trim."
+            System.exit(1)
+        }
+
     }
 
     //
