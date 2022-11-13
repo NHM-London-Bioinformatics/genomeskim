@@ -14,12 +14,16 @@ WorkflowGenomeskim.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.fasta]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 // sets ch_input to the file path of the input samplesheet
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Process other input file paths
+adapters = params.fastp_adapter_fasta ? file(params.fastp_adapter_fasta) : []
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,10 +57,10 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-include { FASTP                       } from '../modules/nf-core/modules/fastp/main'
+include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { FASTP                       } from '../modules/nf-core/fastp/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -93,6 +97,7 @@ workflow GENOMESKIM {
     //
     FASTP (
         INPUT_CHECK.out.reads,
+        adapters, // Just passing a value, no need for this to be a channel
         false,
         false
     )
@@ -123,9 +128,10 @@ workflow GENOMESKIM {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.json.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files.collect(),
+        ch_multiqc_files.collect(), // collect() collapses the channel from a queue to a value
         ch_multiqc_config.collect().ifEmpty([]),
         ch_multiqc_custom_config.collect().ifEmpty([]),
         ch_multiqc_logo.collect().ifEmpty([])

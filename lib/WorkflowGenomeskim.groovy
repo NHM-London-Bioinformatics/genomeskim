@@ -19,7 +19,7 @@ class WorkflowGenomeskim {
         } */
 
         // If fastp adapter trimming has been disabled, passing an adapter fasta is pointless
-        if (params.fastp_disable_adapter_trim & params.fastp_adapter_fasta) {
+        if (params.fastp_disable_adapter_trim && params.fastp_adapter_fasta) {
             log.error "Fastp adapter fasta file provided to --fastp_adapter_fasta, but fastp has been disabled with --fastp_disable_adapter_trim."
             System.exit(1)
         }
