@@ -276,10 +276,10 @@
                 }
             }
         },
-        "adapter_removal": {
-            "title": "Adapter removal",
+        "adapter_removal_and_filtering": {
+            "title": "Adapter removal and filtering",
             "type": "object",
-            "description": "Parameters for fastp adapter removal",
+            "description": "Parameters for fastp adapter removal and quality/length filtering",
             "default": "",
             "properties": {
                 "fastp_disable_adapter_trim": {
@@ -296,16 +296,16 @@
                 "fastp_quality_filter_pclim": {
                     "type": "number",
                     "fa_icon": "fas fa-filter",
-                    "description": "The percentage of bases that must be qualified to retain a read a read",
-                    "default": 40,
-                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter"
+                    "description": "The percentage of bases that may be unqualified to retain a read",
+                    "default": 100,
+                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nBy default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads. Decrease this value to perform quality filtering."
                 },
                 "fastp_quality_filter_phred": {
                     "type": "number",
-                    "fa_icon": "fas fa-search",
+                    "fa_icon": "fas fa-filter",
                     "description": "The minimum phred score to qualify a base",
                     "default": 15,
-                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter"
+                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nNote that this parameter has no effect if --fastp_quality_filter_pclim is set to 100, the default. Thus by default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads."
                 },
                 "fastp_length_filter_min": {
                     "type": "number",
@@ -316,11 +316,12 @@
                 },
                 "fastp_save_outputs": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-save",
+                    "fa_icon": "fas fa-check-square",
                     "description": "Save the fastp output files in outdir"
                 }
             },
-            "help_text": "Parameters for removing trimming adapter sequences, quality filtering and length filtering."
+            "help_text": "Parameters for removing trimming adapter sequences, quality filtering and length filtering.",
+            "fa_icon": "fas fa-filter"
         }
     },
     "allOf": [
@@ -340,7 +341,7 @@
             "$ref": "#/definitions/generic_options"
         },
         {
-            "$ref": "#/definitions/adapter_removal"
+            "$ref": "#/definitions/adapter_removal_and_filtering"
         }
     ]
 }
