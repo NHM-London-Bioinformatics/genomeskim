@@ -23,7 +23,8 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Process other input file paths
 adapters = params.fastp_adapter_fasta ? file(params.fastp_adapter_fasta) : []
-
+getorganelle_seeds = params.getorganelle_seeds ? file(params.getorganelle_seeds) : []
+getorganelle_genes = params.getorganelle_genes ? file(params.getorganelle_genes) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,6 +42,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+include { GETORGANELLE } from '../modules/local/getorganelle'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -102,6 +105,16 @@ workflow GENOMESKIM {
         false
     )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
+
+    //
+    // MODULE: GetOrganell
+    //
+    GETORGANELLE (
+        FASTP.out.reads,
+        getorganelle_seeds,
+        getorganelle_genes
+    )
+    ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
 
     //
     // Dump software versions

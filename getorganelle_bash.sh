@@ -1,10 +1,8 @@
 
 
 # Activate environment
+# conda create --name getorganelle -c bioconda getorganelle
 conda activate getorganelle
-
-# Set the database required
-Fdb="animal_mt"
 
 # Set the default databases location (conda only)
 dbpath=$(conda info --envs | grep "\*" | sed -e "s/^.* //")
@@ -44,4 +42,11 @@ do
 done
 
 
+### Notes
 
+## Parameters
+#see https://github.com/Kinggerm/GetOrganelle#starting-from-reads, especially seeds
+# threads should read values passed through
+# Ollie uses -s, --genes, --reduce-reads-for-coverage inf --max-reads inf
+
+# Need to specify seed numbers for replicability
