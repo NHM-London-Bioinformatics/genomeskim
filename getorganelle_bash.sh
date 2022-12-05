@@ -13,23 +13,35 @@ mkdir -p "$dbpath"
 export GETORG_PATH="$dbpath"
 
 # getorganelle command
-cmd="get_organelle_from_reads.py -1 ../../testdata/minimal/ptilo.R1.fq.gz -2 ../../testdata/minimal/ptilo.R2.fq.gz -F animal_mt -o getorganelle_ptilo_test/"
+cmd="get_organelle_from_reads.py -1 ../../testdata/minimal/ptilo.R1.fq.gz -2 ../../testdata/minimal/ptilo.R2.fq.gz -F animal_mt -o getorganelle_ptilo_test/ 2>&1 >cmd_stdout | grep \"^ERROR\" | head -1"
 
+# Try and run
+errmsg=$(eval $cmd)
 
-# TODO: run getorganelle - if fails, capture output and parse for missing databases
-
-# Install missing databases
-if [[ $(get_organelle_config.py --list | wc -l) != 14  ]]
-then
-   #get_organelle_config.py -a all
-   # This currently fails because the sha256sums are wrong. Use this 
-   git clone https://github.com/Kinggerm/GetOrganelleDB
-   get_organelle_config.py -a all --use-local ./GetOrganelleDB/0.0.1/
-   # TODO write a more sophisticated error catch for these two options
+# If error, fix:
+while [[ ! -z $errmsg ]]
+do
+   # Database(s) are missing
+   missingdbregex="^ERROR: default (.*) database not added yet"
+   if [[ $errmsg =~ $missingdbregex ]]
+   then
+      missingdb="${BASH_REMATCH[1]}"
+      
+      # Ideal command, but fails at the moment
+      # get_organelle_config.py -a "$missingdb"
+      
+      # Workaround
+      wget -O master.zip https://github.com/Kinggerm/GetOrganelleDB/archive/master.zip
+      unzip -o master.zip
+      get_organelle_config.py -a "$missingdb" --use-local ./GetOrganelleDB-master/0.0.1/
+      
+   else
+      echo "$errmsg" 1>&2
+      exit 1
+   fi
    
-   # TODO then re-run getorganelle
-fi
-
+   errmsg=$(eval $cmd)
+done
 
 
 
