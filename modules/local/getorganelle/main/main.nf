@@ -44,65 +44,35 @@ process GETORGANELLE {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def seedsfile = seeds ? "-s ${seeds}" : ''
-    def genesfile = genes ? "--genes ${genes}" : ''
-    // TODO nf-core: If the tool supports multi-threading then you MUST provide the appropriate parameter
-    //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
-    // TODO nf-core: Please replace the example samtools command below with your module's command
-    // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
+    //def prefix = task.ext.prefix ?: "${meta.id}"
     if ( params.enable_conda ) {
         """
+        # # Testing
+        # # Setup 1
+        # wget -O master.zip https://github.com/Kinggerm/GetOrganelleDB/archive/master.zip
+        # unzip -o master.zip
+        # seedspath=GetOrganelleDB-master/0.0.1/SeedDatabase/fungus_mt.fasta
+        # genespath=GetOrganelleDB-master/0.0.1/LabelDatabase/fungus_mt.fasta
+        # # Setup 2
+        # genometype="animal_mt"
+        # seedspath=""
+        # genespath=""
+        # version="0.0.1"
+        get_organelle_from_reads.py \\
+            -1 ${reads[0]} \\
+            -2 ${reads[1]} \\
+            -o output \\
+            -t $task.cpus \\
+            --zip-files \\
+            --verbose \\
+            -s $seeds \\
+            --genes $genes
+            $args \\
+            2>&1 > getorganelle.log"
 
-        # Set the default databases location
-        dbpath=\$(conda info --envs | grep "\*" | sed -e "s/^.* //")
-        dbpath="\$dbpath/getorganelledb/"
-        mkdir -p "\$dbpath"
-        export GETORG_PATH="\$dbpath"
+        # Need to find a way to output the error message properly to nextflow if there is an error.
+        # Is it possible to correct what is printed to the terminal if there's an issue?
 
-        # Set up the command
-        cmd="get_organelle_from_reads.py \\
-                -1 ../../testdata/minimal/ptilo.R1.fq.gz \\
-                -2 ../../testdata/minimal/ptilo.R2.fq.gz \\
-                -o ./ \\
-                -t $task.cpus \\
-                --zip-files \\
-                -verbose \\
-                $args \\
-                2>&1 > getorganelle.log | grep \"^ERROR\" | head -1"
-
-        # Try and run
-        errmsg=\$(eval \$cmd)
-
-        # If error, fix:
-        while [[ ! -z \$errmsg ]]
-        do
-            # Database(s) are missing
-            missingdbregex="^ERROR: default (.*) database not added yet"
-            if [[ \$errmsg =~ \$missingdbregex ]]
-            then
-                missingdb="\${BASH_REMATCH[1]}"
-
-                # Ideal command, but fails at the moment
-                # get_organelle_config.py -a "\$missingdb"
-
-                # Workaround
-                wget -O master.zip https://github.com/Kinggerm/GetOrganelleDB/archive/master.zip
-                unzip -o master.zip
-                get_organelle_config.py -a "\$missingdb" --use-local ./GetOrganelleDB-master/0.0.1/
-
-            else
-                echo "\$errmsg" 1>&2
-                exit 1
-            fi
-
-            errmsg=\$(eval \$cmd)
-        done
-
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
-        END_VERSIONS
         """
     } else {
         """
