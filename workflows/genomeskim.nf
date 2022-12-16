@@ -43,7 +43,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { GETORGANELLE } from '../modules/local/getorganelle'
+include { PREPDATABASES               } from '../modules/local/getorganelle/prepdatabases/main'
+include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -107,12 +108,20 @@ workflow GENOMESKIM {
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
     //
-    // MODULE: GetOrganell
+    // MODULE: GetOrganelle
     //
+    //TODO once automatic database retrieval is implemented, there'll need to be more
+    // logic to define alternative seeds and genes objects
+    PREPDATABASES(
+        params.getorganelle_genometype,
+        getorganelle_seeds
+        getorganelle_genes
+    )
+
     GETORGANELLE (
         FASTP.out.reads,
-        getorganelle_seeds,
-        getorganelle_genes
+        PREPDATABASES.out.seeds.collect(),
+        PREPDATABASES.out.labels.collect()
     )
     ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
 
