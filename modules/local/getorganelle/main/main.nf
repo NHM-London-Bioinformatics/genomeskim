@@ -35,8 +35,8 @@ process GETORGANELLE {
 
     output:
     // Output complete contigs
-    tuple val(meta), path("*path_sequence.fasta"), emit: contig
-    tuple val(meta), path("*.log")               , emit: log
+    tuple val(meta), path("output/*path_sequence.fasta"), emit: contig
+    tuple val(meta), path("getorganelle.log")               , emit: log
     path "versions.yml"                          , emit: versions
 
     when:
@@ -47,17 +47,6 @@ process GETORGANELLE {
     //def prefix = task.ext.prefix ?: "${meta.id}"
     if ( params.enable_conda ) {
         """
-        # # Testing
-        # # Setup 1
-        # wget -O master.zip https://github.com/Kinggerm/GetOrganelleDB/archive/master.zip
-        # unzip -o master.zip
-        # seedspath=GetOrganelleDB-master/0.0.1/SeedDatabase/fungus_mt.fasta
-        # genespath=GetOrganelleDB-master/0.0.1/LabelDatabase/fungus_mt.fasta
-        # # Setup 2
-        # genometype="animal_mt"
-        # seedspath=""
-        # genespath=""
-        # version="0.0.1"
         get_organelle_from_reads.py \\
             -1 ${reads[0]} \\
             -2 ${reads[1]} \\
@@ -66,12 +55,14 @@ process GETORGANELLE {
             --zip-files \\
             --verbose \\
             -s $seeds \\
-            --genes $genes
+            --genes $genes \\
             $args \\
-            2>&1 > getorganelle.log"
+            2>&1 > getorganelle.log
 
-        # Need to find a way to output the error message properly to nextflow if there is an error.
-        # Is it possible to correct what is printed to the terminal if there's an issue?
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
+        END_VERSIONS
 
         """
     } else {
@@ -81,3 +72,5 @@ process GETORGANELLE {
         """
     }
 }
+//TODO Need to find a way to output the error message properly to nextflow if there is an error.
+//TODO Is it possible to correct what is printed to the terminal if there's an issue?

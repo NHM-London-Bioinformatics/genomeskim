@@ -59,7 +59,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 */
 
 //
-// MODULE: Installed directly from nf-core/modules
+// MODULES: Installed from nf-core/modules
 //
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
@@ -114,7 +114,7 @@ workflow GENOMESKIM {
     // logic to define alternative seeds and genes objects
     PREPDATABASES(
         params.getorganelle_genometype,
-        getorganelle_seeds
+        getorganelle_seeds,
         getorganelle_genes
     )
 

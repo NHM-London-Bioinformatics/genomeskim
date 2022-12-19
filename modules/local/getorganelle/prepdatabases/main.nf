@@ -1,5 +1,5 @@
-process CONDASETUP {
-    tag "$meta.id"
+process PREPDATABASES {
+    //tag "$meta.id" I don't think this is needed, $meta is not defined
     label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
@@ -33,15 +33,15 @@ process CONDASETUP {
         //val version //TODO add in a variable specifying the version number of databases to get
 
     output:
-        path("*Seed.fasta") , emit seeds
-        path("*Label.fasta"), emit labels
+        path("*Seed.fasta"),  emit: seeds
+        path("*Label.fasta"), emit: labels
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    //def prefix = task.ext.prefix ?: "${meta.id}" Don't need this - $meta not defined
     //def seedspath = seedspathin ? "${seedspathin}" : ''
     //def genespath = genespathin ? "${seedspathin}" : ''
     def version = '0.0.1'
@@ -61,10 +61,10 @@ process CONDASETUP {
         do
         if [[ \${paths[\$id]} == '' ]]
         then
-            url="https://raw.githubusercontent.com/\$repo/$version/\${dbs[\$id]}Database/\${genometype}.fasta"
+            url="https://raw.githubusercontent.com/\$repo/$version/\${dbs[\$id]}Database/${genometype}.fasta"
             if ! wget -q --spider \$url
             then
-                >&2 echo "Error: could not find a default database in github repo \$repo, are version $version and organelle genome \$genometype both correct?"
+                >&2 echo "Error: could not find a default database in github repo \$repo, are version $version and organelle genome $genometype both correct?"
                 exit 1
             fi
             wget -qO "default_\${dbs[\$id]}.fasta" \$url
