@@ -22,12 +22,12 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "37a98dd100d74d9188a272197663587de1331a0e",
+                        "git_sha": "d497a4868ace3302016ea8ed4b395072d5e833cd",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "bd8092b67b5103bdd52e300f75889442275c3117",
                         "installed_by": ["modules"]
                     },
                     "flash": {
