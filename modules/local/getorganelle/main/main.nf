@@ -23,7 +23,7 @@ process GETORGANELLE {
     // TODO set up for single-end reads
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda (params.enable_conda ? "bioconda::getorganelle=1.7.6.1" : null)
+    conda "bioconda::getorganelle=1.7.6.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
         'quay.io/biocontainers/YOUR-TOOL-HERE' }"
@@ -45,32 +45,25 @@ process GETORGANELLE {
     script:
     def args = task.ext.args ?: ''
     //def prefix = task.ext.prefix ?: "${meta.id}"
-    if ( params.enable_conda ) {
-        """
-        get_organelle_from_reads.py \\
-            -1 ${reads[0]} \\
-            -2 ${reads[1]} \\
-            -o output \\
-            -t $task.cpus \\
-            --zip-files \\
-            --verbose \\
-            -s $seeds \\
-            --genes $genes \\
-            $args \\
-            2>&1 > getorganelle.log
+    """
+    get_organelle_from_reads.py \\
+        -1 ${reads[0]} \\
+        -2 ${reads[1]} \\
+        -o output \\
+        -t $task.cpus \\
+        --zip-files \\
+        --verbose \\
+        -s $seeds \\
+        --genes $genes \\
+        $args \\
+        2>&1 > getorganelle.log
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
-        END_VERSIONS
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
+    END_VERSIONS
 
-        """
-    } else {
-        """
-        echo "Only conda is currently supported by the GetOrganelle module"
-        exit 1
-        """
-    }
+    """
 }
 //TODO Need to find a way to output the error message properly to nextflow if there is an error.
 //TODO Is it possible to correct what is printed to the terminal if there's an issue?
