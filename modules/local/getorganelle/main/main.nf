@@ -23,7 +23,7 @@ process GETORGANELLE {
     // TODO set up for single-end reads
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "bioconda::getorganelle=1.7.6.1"
+    conda "bioconda::getorganelle=1.7.7.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
         'quay.io/biocontainers/YOUR-TOOL-HERE' }"
