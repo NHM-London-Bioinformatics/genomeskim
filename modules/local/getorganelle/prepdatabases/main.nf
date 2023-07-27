@@ -1,5 +1,5 @@
 process PREPDATABASES {
-    tag "$meta.id" I don't think this is needed, $meta is not defined
+    tag "$meta.id"
     label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
