@@ -45,6 +45,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 include { PREPDATABASES               } from '../modules/local/getorganelle/prepdatabases/main'
 include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
+include { SPLITREADS                  } from '../modules/local/getorganell/splitreads/main'
 
 //TODO modules for art, skmer
 
@@ -127,7 +128,8 @@ workflow GENOMESKIM {
         PREPDATABASES.out.labels.collect()
     )
     //Join together input reads with the files comprising the paired reads and unpaired reads used by getorganelle
-    ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads).join(GETORGANELLE.out.unpairedreads)
+    ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)
+    ch_getorganelle_readuse = ch_getorganelle_readuse.join(GETORGANELLE.out.unpairedreads)
 
     SPLITREADS (
         ch_getorganelle_readuse
