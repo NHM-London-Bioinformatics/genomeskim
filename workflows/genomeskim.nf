@@ -45,7 +45,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 include { PREPDATABASES               } from '../modules/local/getorganelle/prepdatabases/main'
 include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
-include { SPLITREADS                  } from '../modules/local/getorganell/splitreads/main'
+include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
 
 //TODO modules for art, skmer
 
