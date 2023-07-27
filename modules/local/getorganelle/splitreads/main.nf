@@ -36,13 +36,11 @@ process SPLITREADS {
 
     when:
         task.ext.when == null || task.ext.when
-    //for f in $pairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*\$//" | sort | uniq > pairedhead.txt
-    //for f in $unpairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*\$//" | sort | uniq > unpairedhead.txt
-    //
+
+    script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def version = '0.0.1'
-
         """
         mkdir output
         # Create paths with standardised names
@@ -66,7 +64,6 @@ process SPLITREADS {
         # Check pairing
 
         regex=\$(if [ -n \$(head -1 ${reads[0]} | grep -e "\\/[12]") ] then "--id-regexp '^(\\S+)\\/[12]'" else "" fi)
-    script:
         for t in unpairused unused
         do
             seqkit pair \\
