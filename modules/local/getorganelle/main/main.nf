@@ -29,18 +29,20 @@ process GETORGANELLE {
         'quay.io/biocontainers/YOUR-TOOL-HERE' }"
 
     input:
-    tuple val(meta), path(reads)
-    path seeds
-    path genes
+        tuple val(meta), path(reads)
+        path seeds
+        path genes
 
     output:
-    // Output complete contigs
-    tuple val(meta), path("output/*path_sequence.fasta"), emit: contig
-    tuple val(meta), path("getorganelle.log")               , emit: log
-    path "versions.yml"                          , emit: versions
+        // Output complete contigs
+        tuple val(meta), path("output/*path_sequence.fasta")        , emit: contig
+        tuple val(meta), path("output/extended_*_paired.fq.tar.gz") , emit: pairedreads
+        tuple val(meta), path("output/extended_*_unpaide.fq.tar.gz"), emit: unpairedreads
+        tuple val(meta), path("getorganelle.log")                   , emit: log
+        path "versions.yml"                                         , emit: versions
 
     when:
-    task.ext.when == null || task.ext.when
+        task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
