@@ -36,8 +36,9 @@ process SPLITREADS {
 
     when:
         task.ext.when == null || task.ext.when
-
-    script:
+    //for f in $pairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*\$//" | sort | uniq > pairedhead.txt
+    //for f in $unpairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*\$//" | sort | uniq > unpairedhead.txt
+    //
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def version = '0.0.1'
@@ -52,8 +53,8 @@ process SPLITREADS {
         [ ! -f output/pairused.${prefix}_2.fastq.gz ] && ln -sf ${pairedreads[1]} output/pairused.${prefix}_2.fastq.gz
 
         # Extract headers of paired and unpaired reads
-        for f in ${pairedreads}; do tar -0xzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*$//" | sort | uniq > pairedhead.txt
-        for f in ${unpairedreads}; do tar -0xzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*$//" | sort | uniq > unpairedhead.txt
+        for f in $pairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > pairedhead.txt
+        for f in $unpairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > unpairedhead.txt
         cat pairedhead.txt unpairedhead.txt > usedhead.txt
 
         # Extract reads
@@ -63,9 +64,9 @@ process SPLITREADS {
         done
 
         # Check pairing
-        slashdir=
-        regex=$(if [ -n $(head -1 ${reads[0]} | grep -e "\/[12]") ] then "--id-regexp '^(\S+)\/[12]'" else "" fi)
 
+        regex=\$(if [ -n \$(head -1 ${reads[0]} | grep -e "\\/[12]") ] then "--id-regexp '^(\\S+)\\/[12]'" else "" fi)
+    script:
         for t in unpairused unused
         do
             seqkit pair \\
