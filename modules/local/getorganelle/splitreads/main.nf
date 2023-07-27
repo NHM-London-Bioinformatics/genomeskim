@@ -30,7 +30,9 @@ process SPLITREADS {
         tuple val(meta), path(reads), path(pairedreads), path(unpairedreads)
 
     output:
-
+        tuple val(meta), path("output/pairused*.fastq.gz")  , emit: usedreadsp
+        tuple val(meta), path("output/unpairused*.fastq.gz"), emit: usedreadsup
+        tuple val(meta), path("output/unused*.fastq.gz")    , emit: unusedreads
 
     when:
         task.ext.when == null || task.ext.when
@@ -46,8 +48,8 @@ process SPLITREADS {
         [ ! -f ${prefix}_1.fastq.gz ] && ln -sf ${reads[0]} ${prefix}_1.fastq.gz
         [ ! -f ${prefix}_2.fastq.gz ] && ln -sf ${reads[1]} ${prefix}_2.fastq.gz
 
-        [ ! -f output/${prefix}.pairused_1.fastq.gz ] && ln -sf ${pairedreads[0]} output/${prefix}.pairused_1.fastq.gz
-        [ ! -f output/${prefix}.pairused_2.fastq.gz ] && ln -sf ${pairedreads[1]} output/${prefix}.pairused_2.fastq.gz
+        [ ! -f output/pairused.${prefix}_1.fastq.gz ] && ln -sf ${pairedreads[0]} output/pairused.${prefix}_1.fastq.gz
+        [ ! -f output/pairused.${prefix}_2.fastq.gz ] && ln -sf ${pairedreads[1]} output/pairused.${prefix}_2.fastq.gz
 
         # Extract headers of paired and unpaired reads
         for f in ${pairedreads}; do tar -0xzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \/].*$//" | sort | uniq > pairedhead.txt
@@ -56,27 +58,22 @@ process SPLITREADS {
 
         # Extract reads
         for i in 1 2; do
-            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f unpairedhead.txt > "${prefix}.unpairused_\${i}.fastq.gz"
-            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f -v usedhead.txt > "${prefix}.unused_\${i}.fastq.gz"
+            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f unpairedhead.txt | gzip > "unpairused.${prefix}_\${i}.fastq.gz"
+            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f -v usedhead.txt | gzip > "unused.${prefix}_\${i}.fastq.gz"
         done
 
         # Check pairing
         slashdir=
         regex=$(if [ -n $(head -1 ${reads[0]} | grep -e "\/[12]") ] then "--id-regexp '^(\S+)\/[12]'" else "" fi)
 
-        seqkit pair \\
-            -1 ${prefix}.unpairused_1.fastq.gz \\
-            -2 ${prefix}.unpairused_2.fastq.gz \\
-            -O output/ \\
-            $regex \\
-            2> unpairused.pairing.log
-
-        seqkit pair \\
-            -1 ${prefix}.unused_1.fastq.gz \\
-            -2 ${prefix}.unused_2.fastq.gz \\
-            -O output/ \\
-            $regex \\
-            2> unused.pairing.log
+        for t in unpairused unused
+        do
+            seqkit pair \\
+                -1 \$t.${prefix}_1.fastq.gz \\
+                -2 \$t.${prefix}_2.fastq.gz \\
+                -O output/ \\
+                \$regex \\
+                2> \$t.pairing.log
 
         """
 
