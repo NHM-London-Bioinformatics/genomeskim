@@ -58,7 +58,7 @@ process SPLITREADS {
         # Extract reads
         for i in 1 2; do
             zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f unpairedhead.txt | gzip > "unpairused.${prefix}_\${i}.fastq.gz"
-            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -f -v usedhead.txt | gzip > "unused.${prefix}_\${i}.fastq.gz"
+            zcat ${prefix}_\${i}.fastq.gz | seqkit grep -v -f usedhead.txt | gzip > "unused.${prefix}_\${i}.fastq.gz"
         done
 
         # Check pairing
