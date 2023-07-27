@@ -42,7 +42,10 @@ process SPLITREADS {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def version = '0.0.1'
         """
+        SEQKIT_THREADS=$task.cpus
+
         mkdir output
+
         # Create paths with standardised names
         [ ! -f ${prefix}_1.fastq.gz ] && ln -sf ${reads[0]} ${prefix}_1.fastq.gz
         [ ! -f ${prefix}_2.fastq.gz ] && ln -sf ${reads[1]} ${prefix}_2.fastq.gz
@@ -63,15 +66,22 @@ process SPLITREADS {
 
         # Check pairing
 
-        regex=\$(if [ -n \$(head -1 ${reads[0]} | grep -e "\\/[12]") ] then "--id-regexp '^(\\S+)\\/[12]'" else "" fi)
+        regex=\$(if [ \$( zcat ${reads[0]} | head -1 | grep -e "\\/[12]") ]; then echo "--id-regexp '^(\\S+)\\/[12]'"; else echo ""; fi)
         for t in unpairused unused
         do
-            seqkit pair \\
-                -1 \$t.${prefix}_1.fastq.gz \\
-                -2 \$t.${prefix}_2.fastq.gz \\
-                -O output/ \\
-                \$regex \\
-                2> \$t.pairing.log
+            if [[ -s "\$t.${prefix}_1.fastq.gz" || -s "\$t.${prefix}_2.fastq.gz" ]]
+            then
+                for i in 1 2; do cp \$t.${prefix}_\${i}.fastq.gz output/\$t.${prefix}_\${i}.fastq.gz; done
+            else
+                seqkit pair \\
+                    -1 \$t.${prefix}_1.fastq.gz \\
+                    -2 \$t.${prefix}_2.fastq.gz \\
+                    -O output/ \\
+                    \$regex \\
+                    --force \\
+                    2> \$t.pairing.log
+            fi
+        done
 
         """
 
