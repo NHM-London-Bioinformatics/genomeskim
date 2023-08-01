@@ -139,8 +139,10 @@ workflow GENOMESKIM {
     ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
 
     // Concatenate unpaired and unused reads
+    ch_nucreads = SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+    ch_nucreads.view
     CATREADS (
-        SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] },
+
         'nuclear'
     )
 
