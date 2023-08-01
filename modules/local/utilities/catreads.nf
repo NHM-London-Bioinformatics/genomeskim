@@ -43,15 +43,15 @@ process CATREADS {
         """
         mkdir output
 
-        outname=\$( if [ -z "$outname "]; then echo "catreads"; else echo "$outname"; fi )
+        outname=\$( if [ -z "$outname" ]; then echo "catreads"; else echo "$outname"; fi )
 
         for r in $reads; do echo \$r; done | sort > readfiles.txt
 
         ext=""
-        if [ \$(grep -c "fastq\\|fq" readfiles.txt) == \$(wc -l readfiles.txt) ]
+        if [ "\$(grep -c "fastq\\|fq" readfiles.txt)" == "\$(cat readfiles.txt | wc -l)" ]
         then
             ext="fastq"
-        elif [ \$(grep -c "fasta\\|fa" readfiles.txt) == \$(wc -l readfiles.txt) ]
+        elif [ "\$(grep -c "fasta\\|fa" readfiles.txt)" == "\$(cat readfiles.txt | wc -l)" ]
         then
             ext="fasta"
         else
