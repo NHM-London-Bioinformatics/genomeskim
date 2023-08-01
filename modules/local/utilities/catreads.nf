@@ -48,10 +48,10 @@ process CATREADS {
         for r in $reads; do echo \$r; done | sort > readfiles.txt
 
         ext=""
-        if [ \$(grep -c "fastq\|fq" readfiles.txt) == \$(wc -l readfiles.txt) ]
+        if [ \$(grep -c "fastq\\|fq" readfiles.txt) == \$(wc -l readfiles.txt) ]
         then
             ext="fastq"
-        elif [ \$(grep -c "fasta\|fa" readfiles.txt) == \$(wc -l readfiles.txt) ]
+        elif [ \$(grep -c "fasta\\|fa" readfiles.txt) == \$(wc -l readfiles.txt) ]
         then
             ext="fasta"
         else
