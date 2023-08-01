@@ -31,14 +31,14 @@ process CATREADS {
         val(outname)
 
     output:
-        tuple val(meta), path("output/*.gz")  , emit: catreads
+        tuple val(meta), path("output/*.gz"), emit: catreads
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = ?: task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def version = '0.0.1'
         """
         mkdir output
@@ -63,8 +63,8 @@ process CATREADS {
 
         if [ \$(wc -l r1.txt) != $(wc -l r2.txt) ]
         then
-           echo "ERROR: not the same number of files for each read direction"
-           exit 1
+            echo "ERROR: not the same number of files for each read direction"
+            exit 1
         fi
 
         cat r1.txt | xargs zcat | gzip > "output/${prefix}_${outname}_1.\${ext}.gz"
