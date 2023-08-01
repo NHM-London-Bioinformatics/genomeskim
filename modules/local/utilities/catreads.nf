@@ -43,15 +43,15 @@ process CATREADS {
         """
         mkdir output
 
-        outname=$( if [ -z "$outname "]; then echo "catreads"; else echo "$outname"; fi )
+        outname=\$( if [ -z "$outname "]; then echo "catreads"; else echo "$outname"; fi )
 
         for r in $reads; do echo \$r; done | sort > readfiles.txt
 
         ext=""
-        if [ $(grep -c "fastq\|fq" readfiles.txt) == $(wc -l readfiles.txt) ]
+        if [ \$(grep -c "fastq\|fq" readfiles.txt) == \$(wc -l readfiles.txt) ]
         then
             ext="fastq"
-        elif [ $(grep -c "fasta\|fa" readfiles.txt) == $(wc -l readfiles.txt) ]
+        elif [ \$(grep -c "fasta\|fa" readfiles.txt) == \$(wc -l readfiles.txt) ]
         then
             ext="fasta"
         else
@@ -61,7 +61,7 @@ process CATREADS {
 
         cat readfiles.txt | tee >(awk '/_1/' > r1.txt) >(awk '/_2/' > r2.txt)
 
-        if [ $(wc -l r1.txt) != $(wc -l r2.txt) ]
+        if [ \$(wc -l r1.txt) != $(wc -l r2.txt) ]
         then
            echo "ERROR: not the same number of files for each read direction"
            exit 1
