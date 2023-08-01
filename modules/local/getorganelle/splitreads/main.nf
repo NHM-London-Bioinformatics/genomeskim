@@ -50,8 +50,8 @@ process SPLITREADS {
         [ ! -f ${prefix}_1.fastq.gz ] && ln -sf ${reads[0]} ${prefix}_1.fastq.gz
         [ ! -f ${prefix}_2.fastq.gz ] && ln -sf ${reads[1]} ${prefix}_2.fastq.gz
 
-        [ ! -f output/pairused.${prefix}_1.fastq.gz ] && ln -sf ${pairedreads[0]} output/pairused.${prefix}_1.fastq.gz
-        [ ! -f output/pairused.${prefix}_2.fastq.gz ] && ln -sf ${pairedreads[1]} output/pairused.${prefix}_2.fastq.gz
+        [ ! -f output/pairused.${prefix}_1.fastq.gz ] && ln -sf \$(readlink -f ${pairedreads[0]}) output/pairused.${prefix}_1.fastq.gz
+        [ ! -f output/pairused.${prefix}_2.fastq.gz ] && ln -sf \$(readlink -f ${pairedreads[1]}) output/pairused.${prefix}_2.fastq.gz
 
         # Extract headers of paired and unpaired reads
         for f in $pairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > pairedhead.txt
