@@ -21,7 +21,7 @@ process CATREADS {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "bioconda::gzip=1.12"
+    conda "conda-forge::gzip=1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
         'biocontainers/biocontainers:v1.2.0_cv1' }"
