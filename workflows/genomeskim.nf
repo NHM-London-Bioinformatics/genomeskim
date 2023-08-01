@@ -139,7 +139,7 @@ workflow GENOMESKIM {
 
     // Concatenate unpaired and unused reads
     CATREADS (
-        SPLITREADS.out.usedreadsup.mix(SPLITREADS.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] },
+        SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] },
         'nuclear'
     )
 
