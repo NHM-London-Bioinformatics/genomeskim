@@ -127,7 +127,7 @@ workflow GENOMESKIM {
         PREPDATABASES.out.seeds.collect(),
         PREPDATABASES.out.labels.collect()
     )
-    //Join together input reads with the files comprising the paired reads and unpaired reads used by getorganelle
+    // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
     ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)
     ch_getorganelle_readuse = ch_getorganelle_readuse.join(GETORGANELLE.out.unpairedreads)
 
@@ -136,6 +136,12 @@ workflow GENOMESKIM {
     )
 
     ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
+
+    // Concatenate unpaired and unused reads
+    CATREADS (
+        SPLITREADS.usedreadsup.mix(SPLITREADS.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+        'nuclear'
+    )
 
     //
     // Dump software versions
