@@ -47,6 +47,7 @@ include { PREPDATABASES               } from '../modules/local/getorganelle/prep
 include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
 include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
 include { CATREADS                    } from '../modules/local/utilities/catreads'
+include { GENOMESCOPE2                } from '../modules/local/genomescope2/main'
 
 //TODO modules for art, skmer
 
@@ -137,12 +138,20 @@ workflow GENOMESKIM {
     )
 
     ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
+    ch_versions = ch_versions.mix(SPLITREADS.out.versions.first())
 
     // Concatenate unpaired and unused reads
     ch_nucreads = SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] }
     CATREADS (
         ch_nucreads,
         'nuclear'
+    )
+
+    //
+    // MODULE: GENOMESCOPE2
+    //
+    GENOMESCOPE2(CATREADS.
+        out.catreads
     )
 
     //
