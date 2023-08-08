@@ -1,6 +1,5 @@
-process GETORGANELLE {
-    tag "$meta.id"
-    label 'process_high'
+process CATREADS {
+    label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
     //               https://github.com/nf-core/modules/tree/master/modules
@@ -19,53 +18,26 @@ process GETORGANELLE {
     // TODO nf-core: Optional inputs are not currently supported by Nextflow. However, using an empty
     //               list (`[]`) instead of a file can be used to work around this issue.
 
-    // TODO figure out a way to generate some multiQC-appropriate files
-    // TODO set up for single-end reads
-
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "bioconda::getorganelle=1.7.7.0"
+    // cv is a vanilla container - nothing installed
+    conda "conda-forge::sed=4.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'quay.io/biocontainers/YOUR-TOOL-HERE' }"
+        'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
+        'biocontainers/biocontainers:v1.2.0_cv1' }"
 
     input:
-        tuple val(meta), path(reads)
-        path seeds
-        path genes
+        path(files)
 
     output:
-        // Output complete contigs
-        tuple val(meta), path("output/*path_sequence.fasta")         , emit: contig
-        tuple val(meta), path("output/extended_*_paired.fq.tar.gz")  , emit: pairedreads
-        tuple val(meta), path("output/extended_*_unpaired.fq.tar.gz"), emit: unpairedreads
-        tuple val(meta), path("getorganelle.log")                    , emit: log
-        path "versions.yml"                                          , emit: versions
+        path("concat.fasta"), emit: path
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    //def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    get_organelle_from_reads.py \\
-        -1 ${reads[0]} \\
-        -2 ${reads[1]} \\
-        -o output \\
-        -t $task.cpus \\
-        --zip-files \\
-        --verbose \\
-        -s $seeds \\
-        --genes $genes \\
-        $args \\
-        2>&1 > getorganelle.log
+        """
+        cat $files > concat.fasta
+        """
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
-    END_VERSIONS
-
-    """
 }
-//TODO Need to find a way to output the error message properly to nextflow if there is an error.
-//TODO Is it possible to correct what is printed to the terminal if there's an issue?

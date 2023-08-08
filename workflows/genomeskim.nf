@@ -14,17 +14,12 @@ WorkflowGenomeskim.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta]
+def checkPathParamList = [ params.input, params.multiqc_config, params.organellerefs, params.fastp_adapter_fasta ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 // sets ch_input to the file path of the input samplesheet
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Process other input file paths
-adapters = params.fastp_adapter_fasta ? file(params.fastp_adapter_fasta) : []
-getorganelle_seeds = params.getorganelle_seeds ? file(params.getorganelle_seeds) : []
-getorganelle_genes = params.getorganelle_genes ? file(params.getorganelle_genes) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +38,6 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PREPDATABASES               } from '../modules/local/getorganelle/prepdatabases/main'
 include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
 include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
 include { CATREADS                    } from '../modules/local/utilities/catreads'
@@ -56,8 +50,8 @@ include { GENOMESCOPE2                } from '../modules/local/genomescope2/main
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 // This subworkflow is all about parsing and checking the samplesheet
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
-
+include { INPUT_CHECK  } from '../subworkflows/local/input_check'
+include { PREPARE_REFS } from '../subworkflows/local/prepare_refs'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -95,6 +89,12 @@ workflow GENOMESKIM {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
+    // SUBWORKFLOW: Retrieve reference sequences as determined by the user
+    //
+
+    PREPARE_REFS(params)
+
+    //
     // MODULE: Run FastQC
     //
     FASTQC (
@@ -116,18 +116,11 @@ workflow GENOMESKIM {
     //
     // MODULE: GetOrganelle
     //
-    //TODO once automatic database retrieval is implemented, there'll need to be more
-    // logic to define alternative seeds and genes objects
-    PREPDATABASES(
-        params.getorganelle_genometype,
-        getorganelle_seeds,
-        getorganelle_genes
-    )
 
     GETORGANELLE (
         FASTP.out.reads,
-        PREPDATABASES.out.seeds.collect(),
-        PREPDATABASES.out.labels.collect()
+        PREPARE_REFS.out.goseeds,
+        PREPARE_REFS.out.golabels
     )
     // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
     ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)

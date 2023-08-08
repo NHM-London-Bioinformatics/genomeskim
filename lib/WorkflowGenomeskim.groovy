@@ -24,6 +24,9 @@ class WorkflowGenomeskim {
             System.exit(1)
         }
 
+        //TODO taxonomy parameter validation, including gofetch parameters
+
+
     }
 
     //
@@ -73,7 +76,7 @@ class WorkflowGenomeskim {
     //
     // Exit pipeline if incorrect --genome key provided
     //
-    private static void genomeExistsError(params, log) {
+/*     private static void genomeExistsError(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
             def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
@@ -82,5 +85,5 @@ class WorkflowGenomeskim {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.error(error_string)
         }
-    }
+    } */
 }

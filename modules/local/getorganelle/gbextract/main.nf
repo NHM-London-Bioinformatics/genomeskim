@@ -1,4 +1,4 @@
-process PREPDATABASES {
+process GBEXTRACT {
     label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
@@ -20,58 +20,37 @@ process PREPDATABASES {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "conda-forge::sed=4.7"
+    conda "bioconda::getorganelle=1.7.7.0 conda-forge::biopython=1.81"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
         'biocontainers/biocontainers:v1.2.0_cv1' }"
 
     input:
-        val genometype
-        path seedspathin
-        path genespathin
+        path infile
         //val version //TODO add in a variable specifying the version number of databases to get
 
     output:
-        path("*Seed.fasta"),  emit: seeds
-        path("*Label.fasta"), emit: labels
+        path("sequences.fasta"),           emit: seqs
+        path("genes.cds/gene/gene.fasta"), emit: genes
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
+    // https://github.com/Kinggerm/GetOrganelle/wiki/FAQ#how-to-assemble-a-target-organelle-genome-using-my-own-reference
     def args = task.ext.args ?: ''
-    //def prefix = task.ext.prefix ?: "${meta.id}" Don't need this - $meta not defined
-    //def seedspath = seedspathin ? "${seedspathin}" : ''
-    //def genespath = genespathin ? "${seedspathin}" : ''
-    def version = '0.0.1'
-
         """
-        repo="Kinggerm/GetOrganelleDB/master"
+        # Convert the genbank to a fasta
+        gb=$infile
+        cmd="import sys; import Bio.SeqIO as io; io.convert('${gb}', 'genbank', sys.stdout, 'fasta')"
+        python -c "${cmd}" > sequences.fasta
 
-        declare -A paths
-        paths['seed']=$seedspathin # Does this work?
-        paths['gene']=$genespathin # If not uncomment lines 45 and 46 and remove in from the end
+        # Extract the genes
+        get_annotated_regions_from_gb.py $infile -o genes.cds -t CDS
 
-        declare -A dbs
-        dbs['seed']="Seed"
-        dbs['gene']="Label"
-
-        for id in seed gene
-        do
-        if [[ \${paths[\$id]} == '' ]]
-        then
-            url="https://raw.githubusercontent.com/\$repo/$version/\${dbs[\$id]}Database/${genometype}.fasta"
-            if ! wget -q --spider \$url
-            then
-                >&2 echo "Error: could not find a default database in github repo \$repo, are version $version and organelle genome $genometype both correct?"
-                exit 1
-            fi
-            wget -qO "default_\${dbs[\$id]}.fasta" \$url
-        else
-            cp \${paths[\$id]} custom_\${dbs[\$id]}.fasta
-        fi
-        done
-
+            cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            getorganelle: \$(get_organelle_from_reads.py -v 2>&1 | sed -e "s/^.* v//g")
+        END_VERSIONS
         """
-
 }
