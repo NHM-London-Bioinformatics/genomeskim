@@ -30,8 +30,8 @@ process GBEXTRACT {
         //val version //TODO add in a variable specifying the version number of databases to get
 
     output:
-        path("sequences.fasta"),           emit: seqs
-        path("genes.cds/gene/gene.fasta"), emit: genes
+        path("sequences.fasta.gz"),           emit: seqs
+        path("genes.cds/gene/gene.fasta.gz"), emit: genes
 
     when:
         task.ext.when == null || task.ext.when
@@ -43,10 +43,12 @@ process GBEXTRACT {
         # Convert the genbank to a fasta
         gb=$infile
         cmd="import sys; import Bio.SeqIO as io; io.convert('${gb}', 'genbank', sys.stdout, 'fasta')"
-        python -c "${cmd}" > sequences.fasta
+        python -c "${cmd}" | gzip > sequences.fasta
 
         # Extract the genes
         get_annotated_regions_from_gb.py $infile -o genes.cds -t CDS
+
+        gzip genes.cds/gene/gene.fasta
 
             cat <<-END_VERSIONS > versions.yml
         "${task.process}":

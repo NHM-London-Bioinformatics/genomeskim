@@ -48,6 +48,9 @@ process GETORGANELLE {
     def args = task.ext.args ?: ''
     //def prefix = task.ext.prefix ?: "${meta.id}"
     """
+
+
+
     get_organelle_from_reads.py \\
         -1 ${reads[0]} \\
         -2 ${reads[1]} \\
@@ -55,8 +58,8 @@ process GETORGANELLE {
         -t $task.cpus \\
         --zip-files \\
         --verbose \\
-        -s $seeds \\
-        --genes $genes \\
+        -s <(zcat $seeds) \\
+        --genes <(zcat $genes) \\
         $args \\
         2>&1 > getorganelle.log
 

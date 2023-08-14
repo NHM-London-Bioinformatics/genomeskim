@@ -38,8 +38,8 @@ process GOFETCH {
         val lineage
 
     output:
-        path "output/database/gene.fasta", emit: genes
-        path "output/database/seed.fasta", emit: seqs
+        path "output/database/gene.fasta.gz", emit: genes
+        path "output/database/seed.fasta.gz", emit: seqs
     // TODO nf-core: List additional required output channels/values here
     //path "versions.yml"           , emit: versions
 
@@ -79,6 +79,7 @@ process GOFETCH {
         exit 1
     fi
 
+    gzip output/database/*.fasta
 
     #cat <<-END_VERSIONS > versions.yml
     #"${task.process}":
