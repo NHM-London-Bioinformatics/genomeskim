@@ -2,10 +2,10 @@
 // Sort out all the different possible reference routes and do any combining needed
 //
 
-include { GOFETCH                     } from '../modules/local/gofetch/main'
+include { GOFETCH                     } from '../modules/local/gofetch'
 include { CHECKFORMAT                 } from '../modules/local/utilities/checkformat'
-include { GBEXTRACT                   } from '../modules/local/getorganelle/gbextract/main'
-include { GETGOREFS                   } from '../modules/local/getorganelle/getgoreferences/main'
+include { GBEXTRACT                   } from '../modules/local/getorganelle/gbextract'
+include { GETGOREFS                   } from '../modules/local/getorganelle/getgoreferences'
 include { CATFASTAORG                 } from '../modules/local/utilities/catfasta'
 include { CATFASTAGENE                } from '../modules/local/utilities/catfasta'
 include { CATFASTASEED                } from '../modules/local/utilities/catfasta'
