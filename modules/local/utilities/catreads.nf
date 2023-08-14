@@ -67,8 +67,8 @@ process CATREADS {
             exit 1
         fi
 
-        cat r1.txt | xargs zcat | gzip > "output/${prefix}_${outname}_1.\${ext}.gz"
-        cat r2.txt | xargs zcat | gzip > "output/${prefix}_${outname}_2.\${ext}.gz"
+        cat r1.txt | xargs cat > "output/${prefix}_${outname}_1.\${ext}.gz"
+        cat r2.txt | xargs cat > "output/${prefix}_${outname}_2.\${ext}.gz"
         """
 
 }
