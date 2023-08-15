@@ -1,4 +1,4 @@
-process CATREADS {
+process CHECKFORMAT {
     label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
@@ -38,14 +38,33 @@ process CATREADS {
     def args = task.ext.args ?: ''
         """
         type=""
-        if [ head -1 $file | grep -q "^>" ]
+
+        filepath=$file
+        if [[ "$file" == "*.gz" ]]
+        then
+            gzip -k -d "$file"
+            filepath="\${filepath%.gz}"
+        fi
+
+        if [ head -1 "\$filepath" | grep -q "^>" ]
         then
             type="fasta"
-        else if [ head -1 $file | grep -q "^LOCUS" ]
+        else if [ head -1 "\$filepath" | grep -q "^>" ]
+        then
+            type="fastq"
+        else if [ head -1 "\$filepath" | grep -q "^LOCUS" ]
         then
             type="gb"
         else
             type="unknown"
         fi
+
+        if [[ "$file" == "*.gz" ]]
+        then
+            rm "\$filepath"
+        fi
+
+
+
         """
 }

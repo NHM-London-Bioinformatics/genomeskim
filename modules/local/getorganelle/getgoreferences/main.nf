@@ -20,7 +20,7 @@ process GETGOREFS {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "conda-forge::sed=4.7"
+    conda "conda-forge::gzip=1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
         'biocontainers/biocontainers:v1.2.0_cv1' }"
@@ -30,8 +30,8 @@ process GETGOREFS {
         //val version //TODO add in a variable specifying the version number of databases to get
 
     output:
-        path("*Seed.fasta"),  emit: seeds
-        path("*Label.fasta"), emit: labels
+        path("*Seed.fasta.gz"),  emit: seeds
+        path("*Label.fasta.gz"), emit: labels
 
     when:
         task.ext.when == null || task.ext.when
@@ -60,6 +60,8 @@ process GETGOREFS {
             fi
             wget -qO "default_\${dbs[\$id]}.fasta" \$url
         done
+
+        gzip default_*.fasta
 
         """
 
