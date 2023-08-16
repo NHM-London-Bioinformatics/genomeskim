@@ -2,16 +2,14 @@
 
 nextflow.enable.dsl = 2
 
-include { CATFASTA } from '../../../../../modules/local/utilities/catfasta'
+include { CATFASTA } from './../../../../modules/local/catfasta/main.nf'
 
 // Test with paired-end data
 
-test_data_base = '../../../../../test_data/'
-
 workflow test_catfasta_gz {
     input = [
-        file("$test_data_base/dummy/a.fasta.gz", checkIfExists: true),
-        file("$test_data_base/dummy/b.fasta.gz", checkIfExists: true)
+        file(params.genomeskim_test_data['dummy']['dummy_a_fasta_gz'], checkIfExists: true),
+        file(params.genomeskim_test_data['dummy']['dummy_b_fasta_gz'], checkIfExists: true)
     ]
 
     CATFASTA(input)

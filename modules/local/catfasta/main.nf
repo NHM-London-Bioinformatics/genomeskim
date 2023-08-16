@@ -1,4 +1,4 @@
-process CATREADS {
+process CATFASTA {
     label 'process_low'
 
     // TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
