@@ -20,7 +20,7 @@ process CATFASTA {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "conda-forge::gzip=1.14"
+    conda "conda-forge::gzip=1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
         'biocontainers/biocontainers:v1.2.0_cv1' }"
@@ -29,7 +29,7 @@ process CATFASTA {
         path(files)
 
     output:
-        path("concat.fasta"), emit: path
+        path("concat.fasta.gz"), emit: path
 
     when:
         task.ext.when == null || task.ext.when

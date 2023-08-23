@@ -61,7 +61,7 @@ process GETGOREFS {
             wget -qO "default_\${dbs[\$id]}.fasta" \$url
         done
 
-        gzip default_*.fasta
+        gzip -n default_*.fasta
 
         """
 
