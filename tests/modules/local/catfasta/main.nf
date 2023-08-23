@@ -2,7 +2,7 @@
 
 nextflow.enable.dsl = 2
 
-include { CATFASTA } from './../../../../modules/local/catfasta/main.nf'
+include { CATFASTA } from './../../../../modules/local/catfasta'
 
 // Test with paired-end data
 

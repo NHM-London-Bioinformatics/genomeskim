@@ -6,19 +6,6 @@
     - local/getorganelle/getgoreferences
   files:
     - path: output/getgorefs/default_Label.fasta.gz
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
+      md5sum: 937a58f5762ac64bcb0d1ffc4c01c6b7
     - path: output/getgorefs/default_Seed.fasta.gz
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_report_2023-08-15_15-42-36.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_timeline_2023-08-15_15-42-36.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_trace_2023-08-15_15-42-36.txt
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/pipeline_dag_2023-08-15_15-42-36.html
-      md5sum: 560c38e4e56890280fd6f1c41caa13e5
+      md5sum: 5d384c0589ab38f153a31fd73d6ed414

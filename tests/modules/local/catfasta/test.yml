@@ -1,0 +1,8 @@
+- name: local catfasta test_catfasta_gz
+  command: nextflow run ./tests/modules//local/catfasta -entry test_catfasta_gz -c ./tests/config/nextflow.config -c ./tests/modules//local/catfasta/nextflow.config
+  tags:
+    - local/catfasta
+    - local
+  files:
+    - path: output/catfasta/concat.fasta.gz
+      md5sum: 32c6ee8e95cee86008048986052632fd

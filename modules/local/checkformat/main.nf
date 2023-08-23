@@ -20,7 +20,7 @@ process CHECKFORMAT {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "conda-forge::sed=4.7"
+    conda "conda-forge::gzip=1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
         'biocontainers/biocontainers:v1.2.0_cv1' }"
@@ -40,31 +40,31 @@ process CHECKFORMAT {
         type=""
 
         filepath=$file
-        if [[ "$file" == "*.gz" ]]
+        if [[ "$file" == *".gz" ]]
         then
-            gzip -k -d "$file"
+            gzip -c -d "$file" > "\${filepath%.gz}"
             filepath="\${filepath%.gz}"
         fi
 
-        if [ head -1 "\$filepath" | grep -q "^>" ]
+        if [[ \$(head -1 "\$filepath" | grep -q "^>") ]]
         then
             type="fasta"
-        else if [ head -1 "\$filepath" | grep -q "^>" ]
+        elif [[ \$(head -1 "\$filepath" | grep -q "^>") ]]
         then
             type="fastq"
-        else if [ head -1 "\$filepath" | grep -q "^LOCUS" ]
+        elif [[ \$(head -1 "\$filepath" | grep -q "^LOCUS") ]]
         then
             type="gb"
         else
             type="unknown"
         fi
 
-        if [[ "$file" == "*.gz" ]]
+        if [[ "$file" == *".gz" ]]
         then
             rm "\$filepath"
         fi
 
-
+        echo "\$type" > type.txt
 
         """
 }
