@@ -49,7 +49,8 @@ process GETORGANELLE {
     //def prefix = task.ext.prefix ?: "${meta.id}"
     """
 
-
+    zcat $seeds > seeds.fasta
+    zcat $genes > labels.fasta
 
     get_organelle_from_reads.py \\
         -1 ${reads[0]} \\
@@ -58,10 +59,12 @@ process GETORGANELLE {
         -t $task.cpus \\
         --zip-files \\
         --verbose \\
-        -s <(zcat $seeds) \\
-        --genes <(zcat $genes) \\
+        -s seeds.fasta \\
+        --genes labels.fasta \\
         $args \\
         2>&1 > getorganelle.log
+
+    rm seeds.fasta labels.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
