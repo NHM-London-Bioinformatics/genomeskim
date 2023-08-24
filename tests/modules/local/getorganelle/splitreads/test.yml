@@ -1,0 +1,31 @@
+- name: local getorganelle splitreads test_splitreads
+  command: nextflow run ./tests/modules//local/getorganelle/splitreads -entry test_splitreads -c ./tests/config/nextflow.config -c ./tests/modules//local/getorganelle/splitreads/nextflow.config
+  tags:
+    - local/getorganelle
+    - local/getorganelle/splitreads
+    - local
+  files:
+    - path: output/pipeline_info/execution_report_2023-08-24_09-04-59.html
+      contains:
+        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
+    - path: output/pipeline_info/execution_timeline_2023-08-24_09-04-59.html
+      contains:
+        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
+    - path: output/pipeline_info/execution_trace_2023-08-24_09-04-59.txt
+      contains:
+        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
+    - path: output/pipeline_info/pipeline_dag_2023-08-24_09-04-59.html
+      md5sum: 0a3545489b7ed28b90234617f2cd574d
+    - path: output/splitreads/output/pairused.test_1.fastq.gz
+      md5sum: 371246033e54b670c382dfcf29ddc8ec
+    - path: output/splitreads/output/pairused.test_2.fastq.gz
+      md5sum: 681e8180e0d5908d8ce601e784cef30e
+    - path: output/splitreads/output/unpairused.test_1.fastq.gz
+      md5sum: 7029066c27ac6f5ef18d660d5741979a
+    - path: output/splitreads/output/unpairused.test_2.fastq.gz
+      md5sum: 7029066c27ac6f5ef18d660d5741979a
+    - path: output/splitreads/output/unused.test_1.fastq.gz
+      md5sum: 23923733bad8db63c5d13d22a9e6cee0
+    - path: output/splitreads/output/unused.test_2.fastq.gz
+      md5sum: 17ec681cc729606dbdb0ac19cb46da69
+    - path: output/splitreads/versions.yml

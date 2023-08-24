@@ -41,14 +41,13 @@ process GBEXTRACT {
     def args = task.ext.args ?: ''
         """
         # Convert the genbank to a fasta
-        gb=$infile
-        cmd="import sys; import Bio.SeqIO as io; io.convert('${gb}', 'genbank', sys.stdout, 'fasta')"
-        python -c "${cmd}" | gzip > sequences.fasta
+        cmd="import sys; import Bio.SeqIO as io; io.convert('$infile', 'genbank', sys.stdout, 'fasta')"
+        python -c "\${cmd}" | gzip > sequences.fasta.gz
 
         # Extract the genes
-        get_annotated_regions_from_gb.py $infile -o genes.cds -t CDS
+        get_annotated_regions_from_gb.py $infile -o genes.cds -t CDS --mix
 
-        gzip genes.cds/gene/gene.fasta
+        gzip -n genes.cds/gene/gene.fasta
 
             cat <<-END_VERSIONS > versions.yml
         "${task.process}":

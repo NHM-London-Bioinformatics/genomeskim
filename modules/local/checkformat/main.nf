@@ -29,7 +29,8 @@ process CHECKFORMAT {
         path(file)
 
     output:
-        env type
+        env type         , emit: format
+        path('type.txt') , emit: formatfile
 
     when:
         task.ext.when == null || task.ext.when
@@ -46,13 +47,13 @@ process CHECKFORMAT {
             filepath="\${filepath%.gz}"
         fi
 
-        if [[ \$(head -1 "\$filepath" | grep -q "^>") ]]
+        if \$(head -1 "\$filepath" | grep -q "^>")
         then
             type="fasta"
-        elif [[ \$(head -1 "\$filepath" | grep -q "^>") ]]
+        elif \$(head -1 "\$filepath" | grep -q "^>")
         then
             type="fastq"
-        elif [[ \$(head -1 "\$filepath" | grep -q "^LOCUS") ]]
+        elif \$(head -1 "\$filepath" | grep -q "^LOCUS")
         then
             type="gb"
         else

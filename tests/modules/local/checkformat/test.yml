@@ -1,53 +1,26 @@
 - name: local checkformat test_checkformat_fastagz
   command: nextflow run ./tests/modules//local/checkformat -entry test_checkformat_fastagz -c ./tests/config/nextflow.config -c ./tests/modules//local/checkformat/nextflow.config
   tags:
-    - local/checkformat
     - local
+    - local/checkformat
   files:
-    - path: output/pipeline_info/execution_report_2023-08-17_09-29-18.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_timeline_2023-08-17_09-29-18.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_trace_2023-08-17_09-29-18.txt
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/pipeline_dag_2023-08-17_09-29-18.html
-      md5sum: 344de7bb8da908c7d20db7076b22d52f
+    - path: output/checkformat/type.txt
+      md5sum: b74f1e3d32bfff4c9b6f5da88e2d3baf
 
 - name: local checkformat test_checkformat_fastqgz
   command: nextflow run ./tests/modules//local/checkformat -entry test_checkformat_fastqgz -c ./tests/config/nextflow.config -c ./tests/modules//local/checkformat/nextflow.config
   tags:
-    - local/checkformat
     - local
+    - local/checkformat
   files:
-    - path: output/pipeline_info/execution_report_2023-08-17_09-30-06.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_timeline_2023-08-17_09-30-06.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_trace_2023-08-17_09-30-06.txt
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/pipeline_dag_2023-08-17_09-30-06.html
-      md5sum: 8e90f86183561369ba6873e90fa55fc4
+    - path: output/checkformat/type.txt
+      md5sum: d9f7497c382d9ee2709f9d1b560aecaf
 
 - name: local checkformat test_checkformat_gb
   command: nextflow run ./tests/modules//local/checkformat -entry test_checkformat_gb -c ./tests/config/nextflow.config -c ./tests/modules//local/checkformat/nextflow.config
   tags:
-    - local/checkformat
     - local
+    - local/checkformat
   files:
-    - path: output/pipeline_info/execution_report_2023-08-17_09-30-47.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_timeline_2023-08-17_09-30-47.html
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/execution_trace_2023-08-17_09-30-47.txt
-      contains:
-        - '# TODO nf-core: file md5sum was variable, please replace this text with a string found in the file instead '
-    - path: output/pipeline_info/pipeline_dag_2023-08-17_09-30-47.html
-      md5sum: 9aa004f9092b10a8a4fc4cde9b1d666c
+    - path: output/checkformat/type.txt
+      md5sum: afe71be5de4c9aaf12ea3a848e0b3269

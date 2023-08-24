@@ -3,26 +3,24 @@
 nextflow.enable.dsl = 2
 
 
-include { SPLITREADS } from '../../../../../modules/local/getorganelle/splitreads'
+include { SPLITREADS } from './../../../../../modules/local/getorganelle/splitreads'
 
 // Test with paired-end data
 
-test_data_base = '../../../../../test_data/'
-
 workflow test_splitreads {
-   input = [
+    input = [
         [id: 'test', single_end: false],
         [
-            file("$test_data_base/dummy/reads_1.fastq.gz", checkIfExists: true),
-            file("$test_data_base/dummy/reads_2.fastq.gz", checkIfExists: true)
+            file(params.genomeskim_test_data['dummy']['dummy_reads_1_fastq_gz'], checkIfExists: true),
+            file(params.genomeskim_test_data['dummy']['dummy_reads_2_fastq_gz'], checkIfExists: true)
         ],
         [
-            file("$test_data_base/dummy/mapped_1.paired.fastq.gz", checkIfExists: true),
-            file("$test_data_base/dummy/mapped_2.paired.fastq.gz", checkIfExists: true)
+            file(params.genomeskim_test_data['dummy']['dummy_mapped_paired_1_fastq_gz'], checkIfExists: true),
+            file(params.genomeskim_test_data['dummy']['dummy_mapped_paired_2_fastq_gz'], checkIfExists: true)
         ],
         [
-            file("$test_data_base/dummy/mapped_1.unpaired.fastq.gz", checkIfExists: true),
-            file("$test_data_base/dummy/mapped_2.unpaired.fastq.gz", checkIfExists: true)
+            file(params.genomeskim_test_data['dummy']['dummy_mapped_unpaired_1_fastq_gz'], checkIfExists: true),
+            file(params.genomeskim_test_data['dummy']['dummy_mapped_unpaired_2_fastq_gz'], checkIfExists: true)
         ]
     ]
 
