@@ -38,7 +38,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { GETORGANELLE                } from '../modules/local/getorganelle/main/main'
+include { GETORGANELLE                } from '../modules/local/getorganelle/assemble'
 include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
 include { CATREADS                    } from '../modules/local/utilities/catreads'
 include { GENOMESCOPE2                } from '../modules/local/genomescope2/main'
@@ -140,12 +140,13 @@ workflow GENOMESKIM {
         'nuclear'
     )
 
+
+
+
     //
     // MODULE: GENOMESCOPE2
     //
-    GENOMESCOPE2(CATREADS.
-        out.catreads
-    )
+    GENOMESCOPE2(CATREADS.out.catreads)
 
     //
     // Dump software versions
