@@ -2,7 +2,6 @@
 
 nextflow.enable.dsl = 2
 
-
 include { GETORGANELLE } from './../../../../../modules/local/getorganelle/assemble'
 
 // Test with paired-end data
