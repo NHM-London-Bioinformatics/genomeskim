@@ -1,11 +1,6 @@
-/*
-Copied from https://github.com/nf-core/ampliseq/blob/master/modules/local/barrnap.nf for consistency
-across pipelines.
-*/
-
 
 process BARRNAP {
-    tag "${fasta}"
+    tag "${meta.id}"
     label 'process_low'
 
     conda "bioconda::barrnap=0.9"
@@ -14,43 +9,40 @@ process BARRNAP {
         'biocontainers/barrnap:0.9--hdfd78af_4' }"
 
     input:
-    path(fasta)
+        val(meta), path(contigs)
 
     output:
-    path( "*.matches.txt" ) , emit: matches
-    path( "rrna.*.gff" )    , emit: gff
-    path "versions.yml"     , emit: versions
+        path( "*.matches.txt" ) , emit: matches
+        path( "*rrna.gff" )     , emit: gff
+        path "versions.yml"     , emit: versions
 
     when:
-    task.ext.when == null || task.ext.when
+        task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def kingdom = task.ext.kingdom ?: "bac,arc,mito,euk"
-    """
-    IFS=',' read -r -a kingdom <<< \"$kingdom\"
-
-    for KINGDOM in "\${kingdom[@]}"
-    do
+        def args = task.ext.args ?: ''
+        def prefix = task.ext.prefix ?: "${meta.id}"
+        """
         barrnap \\
             --threads $task.cpus \\
+            --outseq ${prefix}_barrnap.fasta \\
             $args \\
-            --kingdom \$KINGDOM \\
-            --outseq Filtered.\${KINGDOM}.fasta \\
-            < $fasta \\
-            > rrna.\${KINGDOM}.gff
+            < $contigs \\
+            1> ${prefix}_barrnap_rrna.gff \\
+            2> barrnap.log
 
         #this fails when processing an empty file, so it requires a workaround!
-        if [ -s Filtered.\${KINGDOM}.fasta ]; then
-            grep -h '>' Filtered.\${KINGDOM}.fasta | sed 's/^>//' | sed 's/:\\+/\\t/g' | awk '{print \$2}' | sort -u >\${KINGDOM}.matches.txt
+        #based on barrnap from ampliseq
+        if [ -s ${prefix}_barrnap.fasta ]; then
+            grep -h '>' ${prefix}_barrnap.fasta | sed 's/^>//' | sed 's/:\\+/\\t/g' | awk '{print \$2}' | sort -u >\${KINGDOM}.matches.txt
         else
-            touch \${KINGDOM}.matches.txt
+            touch ${prefix}_barrnap_matches.txt
         fi
-    done
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        barrnap: \$(echo \$(barrnap --version 2>&1) | sed "s/^.*barrnap //g")
-    END_VERSIONS
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            barrnap: \$(echo \$(barrnap --version 2>&1) | sed "s/^.*barrnap //g")
+        END_VERSIONS
     """
 }
