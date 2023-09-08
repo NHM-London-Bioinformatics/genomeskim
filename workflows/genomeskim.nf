@@ -1,5 +1,19 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    HELPER FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+def addtomap(map, key, value) {
+    nwmap = map.clone()
+    nwmap.put(key, value)
+    return nwmap
+}
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -140,8 +154,13 @@ workflow GENOMESKIM {
         'nuclear'
     )
 
-
-
+    // Split out separate assembled contigs
+    ch_contigs = GETORGANELLE.out.contigs
+        .flatMap{ i -> 
+            i[1]
+                .splitFasta(record: [header: true, seqString: true])
+                .collect( j -> [addtomap(i[0], "contig", "${j.header}"), j.seqString])
+        }
 
     //
     // MODULE: GENOMESCOPE2

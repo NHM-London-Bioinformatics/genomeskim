@@ -1,4 +1,4 @@
-process BLAST_BLASTN {
+process BLAST_BLASTNREMOTE {
     tag "$meta.id"
     label 'process_medium'
 
@@ -9,7 +9,6 @@ process BLAST_BLASTN {
 
     input:
     tuple val(meta), path(fasta)
-    path  db
 
     output:
     tuple val(meta), path('*.blastn.txt'), emit: txt
@@ -22,10 +21,9 @@ process BLAST_BLASTN {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    DB=`find -L ./ -name "*.ndb" | sed 's/\\.ndb\$//'`
     blastn \\
+        -remote \\
         -num_threads $task.cpus \\
-        -db \$DB \\
         -query $fasta \\
         $args \\
         -out ${prefix}.blastn.txt

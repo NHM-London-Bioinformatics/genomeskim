@@ -7,12 +7,13 @@ include { GOFETCH                     } from '../modules/local/gofetch'
 workflow CONTIG_VALIDATION {
     take:
         params
+        contig
 
     main:
         //
         // MODULE: BLASTN
         //
-        BLAST_BLASTNREMOTE(GETORGANELLE.out.contig)
+        BLAST_BLASTN(contig, params.blastdb)
 
         //
         // MODULE: MINIMAP2
