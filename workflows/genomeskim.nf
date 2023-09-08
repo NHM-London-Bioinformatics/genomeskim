@@ -64,8 +64,9 @@ include { GENOMESCOPE2                } from '../modules/local/genomescope2/main
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 // This subworkflow is all about parsing and checking the samplesheet
-include { INPUT_CHECK  } from '../subworkflows/local/input_check'
-include { PREPARE_REFS } from '../subworkflows/local/prepare_refs'
+include { INPUT_CHECK          } from '../subworkflows/local/input_check'
+include { PREPARE_REFS         } from '../subworkflows/local/prepare_refs'
+include { ORGANELLE_VALIDATION } from '../subworkflows/local/organelle_validation'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -80,6 +81,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
 /*
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,12 +129,15 @@ workflow GENOMESKIM {
     )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
+    ch_cleanreads = FASTP.out.reads.
+        multiMap{ it -> goreads: binreads: mapreads: it }
+
     //
     // MODULE: GetOrganelle
     //
 
     GETORGANELLE (
-        FASTP.out.reads,
+        ch_cleanreads.goreads,
         PREPARE_REFS.out.goseeds,
         PREPARE_REFS.out.golabels
     )
@@ -148,19 +153,29 @@ workflow GENOMESKIM {
     ch_versions = ch_versions.mix(SPLITREADS.out.versions.first())
 
     // Concatenate unpaired and unused reads
-    ch_nucreads = SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+    ch_nucreads = SPLITREADS.out.usedreadsup
+        .mix(SPLITREADS.out.unusedreads)
+        .groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+
     CATREADS (
         ch_nucreads,
         'nuclear'
     )
 
-    // Split out separate assembled contigs
-    ch_contigs = GETORGANELLE.out.contigs
-        .flatMap{ i -> 
-            i[1]
-                .splitFasta(record: [header: true, seqString: true])
-                .collect( j -> [addtomap(i[0], "contig", "${j.header}"), j.seqString])
-        }
+
+    //
+    // Run contig validation
+    //
+    ORGANELLE_VALIDATION(
+        ch_cleanreads.mapreads,
+        GETORGANELLE.out.contigs,
+        params
+    )
+    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+
+    // Run annotation
+
+
 
     //
     // MODULE: GENOMESCOPE2

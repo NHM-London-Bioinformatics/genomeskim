@@ -23,6 +23,10 @@ input:
       type: file
       description: Input fasta file containing queries sequences
       pattern: "*.{fa,fasta}"
+  - db:
+      type: directory
+      description: Directory containing blast database
+      pattern: "*"
 output:
   - txt:
       type: file
