@@ -14,7 +14,7 @@ def addtomap(map, key, value) {
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    VALIDATE AND STAGE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -34,6 +34,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 // sets ch_input to the file path of the input samplesheet
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Stage remote files required
+if (params.mitos_refdbid) { ch_mitos_ref = Channel.of( [ params.mitos_refdbid, file( params.mitos_ref_databases[params.mitos_refdbid]['file'] ) ] )}
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

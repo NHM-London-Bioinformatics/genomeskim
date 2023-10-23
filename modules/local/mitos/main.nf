@@ -36,7 +36,7 @@ process MITOS {
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
         tuple val(meta), path(contigs)
-        refseq
+        path(db)
 
     output:
         // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
@@ -65,7 +65,7 @@ process MITOS {
         runmitos.py \
             --input $contigs \
             --outdir output/ \
-            -R ./ \
+            -R $db \
             \$args \
             &> mitos.log
 
