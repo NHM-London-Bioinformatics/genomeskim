@@ -35,7 +35,7 @@ process GETORGANELLE {
 
     output:
         // Output complete contigs
-        tuple val(meta), path("output/*path_sequence.fasta")         , emit: contig
+        tuple val(meta), path("output/*path_sequence.fasta")         , emit: contigs
         tuple val(meta), path("output/extended_*_paired.fq.tar.gz")  , emit: pairedreads
         tuple val(meta), path("output/extended_*_unpaired.fq.tar.gz"), emit: unpairedreads
         tuple val(meta), path("getorganelle.log")                    , emit: log
