@@ -18,12 +18,15 @@ def addtomap(map, key, value) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Generate the "Core Nextflow options" section to be printed to terminal. Also used to generate
-// summary text for MultiQC
-// Uses the workflow implicit object that contains workflow and runtime metadata https://www.nextflow.io/docs/latest/metadata.html#runtime-metadata
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params) // This class is initialised in lib/NfcoreSchema.groovy
+include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
 
-// Validate input parameters
+def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+def summary_params = paramsSummaryMap(workflow)
+
+// Print parameter summary log to screen
+log.info logo + paramsSummaryLog(workflow) + citation
+
 WorkflowGenomeskim.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
@@ -102,11 +105,14 @@ workflow GENOMESKIM {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     INPUT_CHECK (
-        ch_input
+        file(params.input)
     )
     // mix adds the contents of another channel (in this case out.versions from INPUT_CHECK) to
     // the given channel (ch_versions)
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
+    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+    // ! There is currently no tooling to help you write a sample sheet schema
 
     //
     // SUBWORKFLOW: Retrieve reference sequences as determined by the user
@@ -203,10 +209,12 @@ workflow GENOMESKIM {
     workflow_summary    = WorkflowGenomeskim.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
-    methods_description    = WorkflowGenomeskim.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    methods_description    = WorkflowGenomeskim.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
     ch_methods_description = Channel.value(methods_description)
 
     ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
@@ -220,6 +228,7 @@ workflow GENOMESKIM {
         ch_multiqc_logo.toList()
     )
     multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
 
 /*
