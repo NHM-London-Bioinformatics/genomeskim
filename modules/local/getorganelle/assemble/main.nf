@@ -23,7 +23,7 @@ process GETORGANELLE {
     // TODO set up for single-end reads
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "bioconda::getorganelle=1.7.7.0"
+    conda "bioconda::getorganelle=1.7.7.0 conda-forge::gzip=1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
         'quay.io/biocontainers/YOUR-TOOL-HERE' }"
@@ -35,9 +35,9 @@ process GETORGANELLE {
 
     output:
         // Output complete contigs
-        tuple val(meta), path("output/*path_sequence.fasta")         , emit: contigs
-        tuple val(meta), path("output/extended_*_paired.fq.tar.gz")  , emit: pairedreads
-        tuple val(meta), path("output/extended_*_unpaired.fq.tar.gz"), emit: unpairedreads
+        tuple val(meta), path("output/*1.1.path_sequence.fasta.gz")  , emit: contigs
+        tuple val(meta), path("output/extended_*_paired.fq.gz")      , emit: pairedreads
+        tuple val(meta), path("output/extended_*_unpaired.fq.gz")    , emit: unpairedreads
         tuple val(meta), path("getorganelle.log")                    , emit: log
         path "versions.yml"                                          , emit: versions
 
@@ -57,7 +57,6 @@ process GETORGANELLE {
         -2 ${reads[1]} \\
         -o output \\
         -t $task.cpus \\
-        --zip-files \\
         --verbose \\
         -s seeds.fasta \\
         --genes labels.fasta \\
@@ -65,6 +64,9 @@ process GETORGANELLE {
         2>&1 > getorganelle.log
 
     rm seeds.fasta labels.fasta
+
+    gzip output/*.fasta
+    gzip output/*.fq
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
