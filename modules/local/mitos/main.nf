@@ -23,7 +23,7 @@ process MITOS {
     //               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
     //               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "bioconda::mitos=2.1.3"
+    conda "bioconda::mitos=2.1.3 conda-forge::gzip=1.13"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mitos:2.1.3--pyhdfd78af_0':
         'biocontainers/mitos:2.1.3--pyhdfd78af_0' }"
@@ -35,13 +35,15 @@ process MITOS {
     //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-        tuple val(meta), path(contigs)
+        tuple val(meta), path(contig)
         path(db)
 
     output:
         // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
         // TODO put output here
         // TODO nf-core: List additional required output channels/values here
+        path "output/result.bed"      , emit: bed
+        path "output/result.gff"      , emit: gff
         path "versions.yml"           , emit: versions
 
     when:
@@ -60,12 +62,16 @@ process MITOS {
         // TODO nf-core: Please replace the example samtools command below with your module's command
         // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
         """
-        args=$(grep -q "circular" $contigs && echo "$args" || echo "$args --linear")
+        args=$(grep -q "circular" $contig && echo "$args" || echo "$args --linear")
+
+        mkdir output
 
         runmitos.py \
-            --input $contigs \
+            --input <( zcat $contig )\
             --outdir output/ \
-            -R $db \
+            --refdir ./ \
+            --refseqver $db \
+            --zip-files
             \$args \
             &> mitos.log
 
