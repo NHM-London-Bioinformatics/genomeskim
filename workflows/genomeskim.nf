@@ -1,6 +1,20 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    HELPER FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+def addtomap(map, key, value) {
+    nwmap = map.clone()
+    nwmap.put(key, value)
+    return nwmap
+}
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    VALIDATE AND STAGE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -20,6 +34,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 // sets ch_input to the file path of the input samplesheet
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Stage remote files required
+if (params.mitos_refdbid) { ch_mitos_ref = Channel.of( [ params.mitos_refdbid, file( params.mitos_ref_databases[params.mitos_refdbid]['file'] ) ] )}
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,8 +68,9 @@ include { GENOMESCOPE2                } from '../modules/local/genomescope2/main
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 // This subworkflow is all about parsing and checking the samplesheet
-include { INPUT_CHECK  } from '../subworkflows/local/input_check'
-include { PREPARE_REFS } from '../subworkflows/local/prepare_refs'
+include { INPUT_CHECK          } from '../subworkflows/local/input_check'
+include { PREPARE_REFS         } from '../subworkflows/local/prepare_refs'
+include { ORGANELLE_VALIDATION } from '../subworkflows/local/organelle_validation'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -66,6 +85,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
 /*
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,12 +133,15 @@ workflow GENOMESKIM {
     )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
+    ch_cleanreads = FASTP.out.reads.
+        multiMap{ it -> goreads: binreads: mapreads: it }
+
     //
     // MODULE: GetOrganelle
     //
 
     GETORGANELLE (
-        FASTP.out.reads,
+        ch_cleanreads.goreads,
         PREPARE_REFS.out.goseeds,
         PREPARE_REFS.out.golabels
     )
@@ -134,12 +157,27 @@ workflow GENOMESKIM {
     ch_versions = ch_versions.mix(SPLITREADS.out.versions.first())
 
     // Concatenate unpaired and unused reads
-    ch_nucreads = SPLITREADS.out.usedreadsup.mix(SPLITREADS.out.unusedreads).groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+    ch_nucreads = SPLITREADS.out.usedreadsup
+        .mix(SPLITREADS.out.unusedreads)
+        .groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+
     CATREADS (
         ch_nucreads,
         'nuclear'
     )
 
+
+    //
+    // Run contig validation
+    //
+    ORGANELLE_VALIDATION(
+        ch_cleanreads.mapreads,
+        GETORGANELLE.out.contigs,
+        params
+    )
+    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+
+    // Run annotation
 
 
 
