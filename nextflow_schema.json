@@ -19,6 +19,7 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
@@ -276,110 +277,6 @@
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
-        },
-        "adapter_removal_and_filtering": {
-            "title": "Adapter removal and filtering",
-            "type": "object",
-            "description": "Parameters for fastp adapter removal and quality/length filtering",
-            "default": "",
-            "properties": {
-                "fastp_disable_adapter_trim": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check-square",
-                    "description": "Don't do adapter trimming"
-                },
-                "fastp_adapter_fasta": {
-                    "type": "string",
-                    "fa_icon": "fas fa-dna",
-                    "description": "Path to fasta file containing adapters to remove",
-                    "help_text": "Fastp will auto-detect most common adapters, but to supply extra adapters to remove, supply them in a fasta file. Passed to `fastp --adapter_fasta`, see https://github.com/OpenGene/fastp#adapters",
-                    "format": "file-path"
-                },
-                "fastp_quality_filter_pclim": {
-                    "type": "number",
-                    "fa_icon": "fas fa-filter",
-                    "description": "The percentage of bases that may be unqualified to retain a read",
-                    "default": 100,
-                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nBy default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads. Decrease this value to perform quality filtering."
-                },
-                "fastp_quality_filter_phred": {
-                    "type": "number",
-                    "fa_icon": "fas fa-filter",
-                    "description": "The minimum phred score to qualify a base",
-                    "default": 15,
-                    "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nNote that this parameter has no effect if --fastp_quality_filter_pclim is set to 100, the default. Thus by default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads."
-                },
-                "fastp_length_filter_min": {
-                    "type": "number",
-                    "fa_icon": "fas fa-filter",
-                    "description": "Minimum read length to be retained",
-                    "help_text": "Passed through to `fastp --length_required`, see https://github.com/OpenGene/fastp#length-filter",
-                    "default": 15
-                },
-                "fastp_save_outputs": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check-square",
-                    "description": "Save all fastp output files in outdir"
-                }
-            },
-            "help_text": "Parameters for removing trimming adapter sequences, quality filtering and length filtering.",
-            "fa_icon": "fas fa-filter"
-        },
-        "get": {
-            "title": "Get",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "getorganelle_genometype": {
-                    "type": "string",
-                    "default": "None",
-                    "help_text": "Passed through to `get_organelle_from_reads.py -F`. Must be one or more (comma-separated list) of:\nembplant_pt\nother_pt\nembplant_mt\nembplant_nr\nanimal_mt\nfungus_mt\nfungus_nr\nanonym\nSee https://github.com/Kinggerm/GetOrganelle/wiki/Usage#get_organelle_from_readspy",
-                    "fa_icon": "fas fa-book",
-                    "description": "Target organelle genome type, in GetOrganelle format"
-                },
-                "getorganelle_seeds": {
-                    "type": "string",
-                    "default": "None",
-                    "format": "file-path",
-                    "help_text": "Path to a fasta format file(s) of initial seed sequence(s), used for identifying initial organelle reads only. If multiple genome types are supplied to `--getorganelle_genometype`, the same number of seeds should be supplied in a comma-separated list. See https://github.com/Kinggerm/GetOrganelle/wiki/Usage#get_organelle_from_readspy",
-                    "fa_icon": "fas fa-book",
-                    "description": "Path to one or more fasta file(s) of seed sequence(s)"
-                },
-                "getorganelle_genes": {
-                    "type": "string",
-                    "default": "None",
-                    "help_text": "The path to a fasta file or base name of a blast database containing one set of protein coding genes and ribosomal RNAs from one reference genome. If multiple genome types are supplied to `--getorganelle_genometype`, the same number of gene files should be supplied in a comma-separated list.",
-                    "fa_icon": "fas fa-book",
-                    "description": "Path to one or more file(s) of gene sequence(s)"
-                },
-                "getorganelle_rseed": {
-                    "type": "integer",
-                    "default": 12345,
-                    "description": "Random seed number for reproducibility",
-                    "fa_icon": "fas fa-dice"
-                },
-                "getorganelle_maxreads": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-caret-up",
-                    "description": "Maximum number of reads to use from inputs. Default: no limit"
-                },
-                "getorganelle_reducereads": {
-                    "type": "integer",
-                    "help_text": "Default inf: no reducing of reads for coverage",
-                    "fa_icon": "fas fa-sort-down",
-                    "description": "Maximum number of reads according to coverage. Default: no limit"
-                },
-                "getorganelle_save_outputs": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check-square",
-                    "description": "Save all getorganelle output files in outdir"
-                }
-            },
-            "required": [
-                "getorganelle_genometype"
-            ],
-            "fa_icon": "fas fa-circle-notch"
         }
     },
     "allOf": [
