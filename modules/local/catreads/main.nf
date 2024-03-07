@@ -61,7 +61,7 @@ process CATREADS {
 
         cat readfiles.txt | tee >(awk '/_1/' > r1.txt) >(awk '/_2/' > r2.txt)
 
-        if [ \$(wc -l r1.txt) != \$(wc -l r2.txt) ]
+        if [ \$(cat r1.txt | wc -l) != \$(cat r2.txt | wc -l) ]
         then
             echo "ERROR: not the same number of files for each read direction"
             exit 1
