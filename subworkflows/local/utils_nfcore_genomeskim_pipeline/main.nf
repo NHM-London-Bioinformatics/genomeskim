@@ -75,7 +75,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // Custom validation for pipeline parameters
     //
-    validateInputParameters()
+    //validateInputParameters()
 
     //
     // Create channel from input file provided through params.input
@@ -151,7 +151,7 @@ workflow PIPELINE_COMPLETION {
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
-    genomeExistsError()
+    //genomeExistsError()
 }
 
 //
@@ -171,19 +171,19 @@ def validateInputSamplesheet(input) {
 //
 // Get attribute from genome config file e.g. fasta
 //
-def getGenomeAttribute(attribute) {
+/* def getGenomeAttribute(attribute) {
     if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
         if (params.genomes[ params.genome ].containsKey(attribute)) {
             return params.genomes[ params.genome ][ attribute ]
         }
     }
     return null
-}
+} */
 
 //
 // Exit pipeline if incorrect --genome key provided
 //
-def genomeExistsError() {
+/* def genomeExistsError() {
     if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
@@ -192,7 +192,7 @@ def genomeExistsError() {
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
-}
+} */
 
 //
 // Generate methods description for MultiQC

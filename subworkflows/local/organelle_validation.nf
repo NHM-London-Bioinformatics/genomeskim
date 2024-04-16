@@ -2,9 +2,9 @@
 // Validate and filter organelle contigs
 //
 
-include { BLAST_BLASTN     } from '../modules/nf-core/blast/blastn'
-include { MINIMAP2_ALIGN   } from '../modules/nf-core/minimap2/align'
-include { BLOBTOOLS        } from '../modules/local/blobtools'
+include { BLAST_BLASTN     } from '../../modules/nf-core/blast/blastn'
+include { MINIMAP2_ALIGN   } from '../../modules/nf-core/minimap2/align'
+include { BLOBTOOLS        } from '../../modules/local/blobtools'
 
 workflow ORGANELLE_VALIDATION {
     take:

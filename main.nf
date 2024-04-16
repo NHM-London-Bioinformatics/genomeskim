@@ -17,11 +17,9 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { GENOMESKIM  } from './workflows/genomeskim'
+include { GENOMESKIM              } from './workflows/genomeskim'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeskim_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeskim_pipeline'
-
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_genomeskim_pipeline'
 
 
 /*

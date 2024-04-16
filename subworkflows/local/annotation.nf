@@ -2,8 +2,8 @@
 // Annotate contigs
 //
 
-include { MITOS   } from '../modules/local/mitos'
-include { BARRNAP } from '../modules/local/barrnap'
+include { MITOS   } from '../../modules/local/mitos'
+include { BARRNAP } from '../../modules/local/barrnap'
 
 workflow ANNOTATION {
     take:

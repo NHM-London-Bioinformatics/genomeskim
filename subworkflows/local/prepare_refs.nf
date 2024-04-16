@@ -2,14 +2,14 @@
 // Sort out all the different possible reference routes and do any combining needed
 //
 
-include { GOFETCH                     } from '../modules/local/gofetch'
-include { CHECKFORMAT                 } from '../modules/local/utilities/checkformat'
-include { GBEXTRACT                   } from '../modules/local/getorganelle/gbextract'
-include { GETGOREFS                   } from '../modules/local/getorganelle/getgoreferences'
-include { CATFASTAORG                 } from '../modules/local/utilities/catfasta'
-include { CATFASTAGENE                } from '../modules/local/utilities/catfasta'
-include { CATFASTASEED                } from '../modules/local/utilities/catfasta'
-include { CATFASTALABELS              } from '../modules/local/utilities/catfasta'
+include { GOFETCH                     } from '../../modules/local/gofetch'
+include { CHECKFORMAT                 } from '../../modules/local/checkformat'
+include { GBEXTRACT                   } from '../../modules/local/getorganelle/gbextract'
+include { GETGOREFS                   } from '../../modules/local/getorganelle/getgoreferences'
+include { CATFASTA as CATFASTAORG     } from '../../modules/local/catfasta'
+include { CATFASTA as CATFASTAGENE    } from '../../modules/local/catfasta'
+include { CATFASTA as CATFASTASEED    } from '../../modules/local/catfasta'
+include { CATFASTA as CATFASTALABELS  } from '../../modules/local/catfasta'
 
 workflow PREPARE_REFS {
     take:
@@ -23,8 +23,6 @@ workflow PREPARE_REFS {
 
         ch_goseeds = Channel.empty()
         ch_golabels = Channel.empty()
-
-        ch_mitos_ref = Channel.empty()
 
         // If taxon or lineage are supplied
         if ( params.gofetch_taxon || params.gofetch_lineage ){
@@ -90,18 +88,10 @@ workflow PREPARE_REFS {
 
         }
 
-        // If MITOS is to be run
-        if ( params.mitos_refdbid ) {
-
-            ch_mitos_ref = Channel.fromPath(params.mitos_ref_databases[params.mitos_refdbid]["file"]).collect()
-
-        }
-
     // OUTPUT
     emit:
         orgseqs  = ch_orgseqs
         goseeds  = ch_goseeds
         golabels = ch_golabels
-        mitosref = ch_mitos_ref
         versions = ch_preprefs_versions
 }
