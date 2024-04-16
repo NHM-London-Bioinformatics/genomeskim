@@ -2,7 +2,7 @@ process MITOS {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::mitos=2.1.3 conda-forge::gzip=1.13"
+    conda "bioconda::mitos=2.1.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mitos:2.1.3--pyhdfd78af_0':
         'biocontainers/mitos:2.1.3--pyhdfd78af_0' }"

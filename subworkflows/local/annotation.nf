@@ -2,7 +2,8 @@
 // Annotate contigs
 //
 
-include {    } from '../modules//'
+include { MITOS   } from '../modules/local/mitos'
+include { BARRNAP } from '../modules/local/barrnap'
 
 workflow ANNOTATION {
     take:
@@ -13,12 +14,29 @@ workflow ANNOTATION {
     main:
         ch_annotation_versions = Channel.empty()
 
-        // If using mitos
+        //
+        // MODULE: MITOS
+        //
         ch_mitos_ref_untar = UNTAR(ch_mitos_ref).collect()
-        MITOS(ch_contigs, ch_mitos_ref_untar)
+        MITOS(
+            ch_contigs,
+            ch_mitos_ref_untar
+        )
+        ch_annotation_versions = ch_validation_versions.mix(MITOS.out.versions)
 
-        // If using Barrnap
-        BARRNAP(ch_contigs)
+        //
+        // MODULE: BARRNAP
+        //
+        BARRNAP(
+            ch_contigs
+        )
+        ch_annotation_versions = ch_validation_versions.mix(BARRNAP.out.versions)
+
+
+    emit:
+        annotations = //Some annotations channel
+        versions = ch_annotation_versions
+}
 
 
 

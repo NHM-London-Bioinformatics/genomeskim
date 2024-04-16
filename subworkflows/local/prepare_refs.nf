@@ -24,6 +24,8 @@ workflow PREPARE_REFS {
         ch_goseeds = Channel.empty()
         ch_golabels = Channel.empty()
 
+        ch_mitos_ref = Channel.empty()
+
         // If taxon or lineage are supplied
         if ( params.gofetch_taxon || params.gofetch_lineage ){
             GOFETCH(params.gofetch_taxon, params.gofetch_lineage)
@@ -88,10 +90,18 @@ workflow PREPARE_REFS {
 
         }
 
+        // If MITOS is to be run
+        if ( params.mitos_refdbid ) {
+
+            ch_mitos_ref = Channel.fromPath(params.mitos_ref_databases[params.mitos_refdbid]["file"]).collect()
+
+        }
+
     // OUTPUT
     emit:
         orgseqs  = ch_orgseqs
         goseeds  = ch_goseeds
         golabels = ch_golabels
+        mitosref = ch_mitos_ref
         versions = ch_preprefs_versions
 }

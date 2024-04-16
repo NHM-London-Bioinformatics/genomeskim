@@ -59,7 +59,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 include { GETORGANELLE                } from '../modules/local/getorganelle/assemble'
 include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
-include { CATREADS                    } from '../modules/local/utilities/catreads'
+include { CATNUCREADS                 } from '../modules/local/utilities/catreads'
 include { GENOMESCOPE2                } from '../modules/local/genomescope2/main'
 
 //TODO modules for art, skmer
@@ -134,6 +134,80 @@ workflow GENOMESKIM {
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+//
+    // MODULE: Run fastp
+    //
+    FASTP (
+        INPUT_CHECK.out.reads,
+        adapters, // Just passing a value, no need for this to be a channel
+        false,
+        false
+    )
+    ch_versions = ch_versions.mix(FASTP.out.versions.first())
+
+    ch_cleanreads = FASTP.out.reads.
+        multiMap{ it -> goreads: binreads: mapreads: it }
+
+    //
+    // MODULE: GetOrganelle
+    //
+
+    GETORGANELLE (
+        ch_cleanreads.goreads,
+        PREPARE_REFS.out.goseeds,
+        PREPARE_REFS.out.golabels
+    )
+    // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
+    ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)
+    ch_getorganelle_readuse = ch_getorganelle_readuse.join(GETORGANELLE.out.unpairedreads)
+
+    SPLITREADS (
+        ch_getorganelle_readuse
+    )
+
+    ch_versions = ch_versions.mix(GETORGANELLE.out.versions.first())
+    ch_versions = ch_versions.mix(SPLITREADS.out.versions.first())
+
+    // Concatenate unpaired and unused reads
+    ch_nucreads = SPLITREADS.out.usedreadsup
+        .mix(SPLITREADS.out.unusedreads)
+        .groupTuple().map { i -> [ i[0], i[1].flatten() ] }
+
+    CATNUCREADS (
+        ch_nucreads,
+        'nuclear'
+    )
+
+    //
+    // Run contig validation
+    //
+    ORGANELLE_VALIDATION(
+        ch_cleanreads.mapreads,
+        GETORGANELLE.out.contigs,
+        params
+    )
+    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+
+    //
+    // Run annotation
+    //
+    ANNOTATION(
+        ORGANELLE_VALIDATION.out.contigs,
+        PREPARE_REFS.out.mitosref,
+        params
+    )
+
+    //
+    // Extract barcodes
+    //
+
+
+    //
+    // MODULE: GENOMESCOPE2
+    //
+    GENOMESCOPE2(CATNUCREADS.out.catreads)
+
 
     //
     // Collate and save software versions
