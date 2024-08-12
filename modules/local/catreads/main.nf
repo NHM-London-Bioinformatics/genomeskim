@@ -59,7 +59,9 @@ process CATREADS {
             exit 1
         fi
 
-        cat readfiles.txt | tee >(awk '/_1/' > r1.txt) >(awk '/_2/' > r2.txt)
+        #cat readfiles.txt | tee >(awk '/_1/' > r1.txt) >(awk '/_2/' > r2.txt)
+        grep "_1" readfiles.txt > r1.txt
+        grep "_2" readfiles.txt > r2.txt
 
         if [ \$(cat r1.txt | wc -l) != \$(cat r2.txt | wc -l) ]
         then
@@ -67,8 +69,8 @@ process CATREADS {
             exit 1
         fi
 
-        cat r1.txt | xargs cat > "output/${prefix}_${outname}_1.\${ext}.gz"
-        cat r2.txt | xargs cat > "output/${prefix}_${outname}_2.\${ext}.gz"
+        cat r1.txt | xargs cat > "output/${prefix}_\${outname}_1.\${ext}.gz"
+        cat r2.txt | xargs cat > "output/${prefix}_\${outname}_2.\${ext}.gz"
         """
 
 }

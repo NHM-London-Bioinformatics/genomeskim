@@ -75,7 +75,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // Custom validation for pipeline parameters
     //
-    //validateInputParameters()
+    validateInputParameters()
 
     //
     // Create channel from input file provided through params.input
@@ -100,9 +100,23 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+    //
+    // Check for presence of any local files
+    //
+
+    def checkPathParamList = [params.multiqc_config, params.organellerefs, params.fastp_adapter_fasta]
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+    //
+    // Stage any remote files
+    //
+    ch_mitos_ref = Channel.empty()
+    if (params.mitos_refdbid) { ch_mitos_ref = Channel.of( [ params.mitos_refdbid, file( params.mitos_ref_databases[params.mitos_refdbid]['file'] ) ] )}
+
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
+    mitos_ref   = ch_mitos_ref
 }
 
 /*
@@ -152,6 +166,7 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     //genomeExistsError()
+    //TODO check params.getorganelle_genometype value(s) are valid
 }
 
 //

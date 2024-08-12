@@ -4,6 +4,7 @@
 
 include { MITOS   } from '../../modules/local/mitos'
 include { BARRNAP } from '../../modules/local/barrnap'
+include { UNTAR   } from '../../modules/nf-core/untar'
 
 workflow ANNOTATION {
     take:
@@ -17,30 +18,25 @@ workflow ANNOTATION {
         //
         // MODULE: MITOS
         //
-        ch_mitos_ref_untar = UNTAR(ch_mitos_ref).collect()
+        UNTAR(ch_mitos_ref)
+
         MITOS(
             ch_contigs,
-            ch_mitos_ref_untar
+            UNTAR.out.untar
         )
-        ch_annotation_versions = ch_validation_versions.mix(MITOS.out.versions)
+        ch_annotation_versions = ch_annotation_versions.mix(MITOS.out.versions)
 
         //
         // MODULE: BARRNAP
         //
-        BARRNAP(
+/*         BARRNAP(
             ch_contigs
         )
-        ch_annotation_versions = ch_validation_versions.mix(BARRNAP.out.versions)
-
+        ch_annotation_versions = ch_annotation_versions.mix(BARRNAP.out.versions)
+*/
 
     emit:
         annotations = //Some annotations channel
         versions = ch_annotation_versions
 }
 
-
-
-
-
-
-}

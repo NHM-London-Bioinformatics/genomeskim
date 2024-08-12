@@ -35,14 +35,15 @@ workflow NFCORE_GENOMESKIM {
 
     take:
     samplesheet // channel: samplesheet read in from --input
-
+    mitos_ref
     main:
 
     //
     // WORKFLOW: Run pipeline
     //
     GENOMESKIM (
-        samplesheet
+        samplesheet,
+        mitos_ref
     )
 
     emit:
@@ -76,7 +77,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_GENOMESKIM (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.mitos_ref
     )
 
     //

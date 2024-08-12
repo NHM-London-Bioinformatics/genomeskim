@@ -8,9 +8,10 @@ process CATFASTA {
 
     input:
         path(files)
+        val prefix
 
     output:
-        path("concat.fasta.gz"), emit: path
+        path("*concat.fasta.gz"), emit: catfasta
 
     when:
         task.ext.when == null || task.ext.when
@@ -18,7 +19,8 @@ process CATFASTA {
     script:
     def args = task.ext.args ?: ''
         """
-        cat $files > concat.fasta.gz
+        cat $files > ${prefix}_concat.fasta.gz
+
         """
 
 }

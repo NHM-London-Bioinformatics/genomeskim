@@ -19,9 +19,10 @@ def addtomap(map, key, value) {
 */
 
 include { GETORGANELLE                } from '../modules/local/getorganelle/assemble'
-include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads/main'
+include { SPLITREADS                  } from '../modules/local/getorganelle/splitreads'
 include { CATREADS                    } from '../modules/local/catreads'
-include { GENOMESCOPE2                } from '../modules/local/genomescope2/main'
+include { JELLYFISH                   } from '../modules/local/jellyfish'
+
 
 //TODO modules for art, skmer
 
@@ -31,8 +32,10 @@ include { GENOMESCOPE2                } from '../modules/local/genomescope2/main
 //
 // This subworkflow is all about parsing and checking the samplesheet
 //include { INPUT_CHECK          } from '../subworkflows/local/input_check'
-include { PREPARE_REFS         } from '../subworkflows/local/prepare_refs'
-include { ORGANELLE_VALIDATION } from '../subworkflows/local/organelle_validation'
+include { PREPARE_REFS            } from '../subworkflows/local/prepare_refs'
+//include { ORGANELLE_VALIDATION   } from '../subworkflows/local/organelle_validation'
+include { ANNOTATION              } from '../subworkflows/local/annotation'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -44,9 +47,8 @@ include { ORGANELLE_VALIDATION } from '../subworkflows/local/organelle_validatio
 //
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-//include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
-
+include { GENOMESCOPE2                } from '../modules/nf-core/genomescope2/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE FUNCTIONS
@@ -68,12 +70,12 @@ workflow GENOMESKIM {
 
     take:
     ch_samplesheet
+    ch_mitos_ref
 
     main:
     // Create an empty channel to record software versions
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -83,7 +85,8 @@ workflow GENOMESKIM {
     ) */
     // mix adds the contents of another channel (in this case out.versions from INPUT_CHECK) to
     // the given channel (ch_versions)
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
@@ -94,21 +97,25 @@ workflow GENOMESKIM {
 
     PREPARE_REFS(params)
 
+    //PREPARE_REFS.out.goseeds.view()
+
     //
     // MODULE: Run FastQC
     //
+
     FASTQC (
         ch_samplesheet
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-//
+    //
     // MODULE: Run fastp
     //
+    fastp_adapter_fasta = params.fastp_adapter_fasta ?: []
     FASTP (
-        INPUT_CHECK.out.reads,
-        adapters, // Just passing a value, no need for this to be a channel
+        ch_samplesheet,
+        fastp_adapter_fasta, // Just passing a value, no need for this to be a channel
         false,
         false
     )
@@ -116,16 +123,15 @@ workflow GENOMESKIM {
 
     ch_cleanreads = FASTP.out.reads.
         multiMap{ it -> goreads: binreads: mapreads: it }
-
     //
     // MODULE: GetOrganelle
     //
-
     GETORGANELLE (
         ch_cleanreads.goreads,
         PREPARE_REFS.out.goseeds,
         PREPARE_REFS.out.golabels
     )
+
     // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
     ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)
     ch_getorganelle_readuse = ch_getorganelle_readuse.join(GETORGANELLE.out.unpairedreads)
@@ -146,25 +152,26 @@ workflow GENOMESKIM {
         ch_nucreads,
         'nuclear'
     )
-
+/*
     //
     // Run contig validation
     //
-    ORGANELLE_VALIDATION(
+/*     ORGANELLE_VALIDATION(
         ch_cleanreads.mapreads,
         GETORGANELLE.out.contigs,
         params
     )
-    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions) */
 
     //
     // Run annotation
     //
-    ANNOTATION(
-        ORGANELLE_VALIDATION.out.contigs,
+/*     ANNOTATION(
+//        ORGANELLE_VALIDATION.out.contigs,
+        GETORGANELLE.out.contigs,
         ch_mitos_ref,
         params
-    )
+    ) */
 
     //
     // Extract barcodes
@@ -172,10 +179,11 @@ workflow GENOMESKIM {
 
 
     //
-    // MODULE: GENOMESCOPE2
+    // Genome statistics
     //
-    GENOMESCOPE2(CATNUCREADS.out.catreads)
 
+    JELLYFISH(CATREADS.out.catreads)
+    GENOMESCOPE2(JELLYFISH.out.histo)
 
     //
     // Collate and save software versions
@@ -206,7 +214,7 @@ workflow GENOMESKIM {
     )
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = [] //MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 

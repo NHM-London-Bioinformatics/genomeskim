@@ -19,7 +19,7 @@ workflow ORGANELLE_VALIDATION {
         // Split out contigs to multiple parallel channels
 
         ch_contigssplit = ch_contigsin
-            .multiMap { i -> contigs4blast: contigs4map: contigs4blob: i}
+            .multiMap { i -> contigs4blast: contigs4map: contigs4blob: i }
 
         //
         // MODULE: BLASTN
@@ -47,7 +47,7 @@ workflow ORGANELLE_VALIDATION {
             ch_contigs4blob
             BLAST_BLASTN.out.txt
             MINIMAP2_ALIGN.out.bam
-            params.taxdump
+            params.taxdumppath
         )
         ch_validation_versions = ch_validation_versions.mix(BLOBTOOLS.out.versions)
 

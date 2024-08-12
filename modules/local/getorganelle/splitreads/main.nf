@@ -21,10 +21,10 @@ process SPLITREADS {
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     // cv is a vanilla container - nothing installed
-    conda "bioconda::seqkit=2.5.0"
+    conda "bioconda::seqkit=2.8.1-0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
-        'biocontainers/biocontainers:v1.2.0_cv1' }"
+        'https://depot.galaxyproject.org/singularity/seqkit:2.8.1--h9ee0642_0' :
+        'biocontainers/seqkit:2.8.1--h9ee0642_0' }"
 
     input:
         tuple val(meta), path(reads), path(pairedreads), path(unpairedreads)
@@ -55,8 +55,9 @@ process SPLITREADS {
     [ ! -f output/pairused.${prefix}_2.fastq.gz ] && ln -sf \$(readlink -f ${pairedreads[1]}) output/pairused.${prefix}_2.fastq.gz
 
     # Extract headers of paired and unpaired reads
-    for f in $pairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > pairedhead.txt
-    for f in $unpairedreads; do tar -Oxzf \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > unpairedhead.txt
+    #seems getorganelle outputs are sometimes tar - need to write something with tar -Oxzf to deal
+    for f in $pairedreads; do zcat \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > pairedhead.txt
+    for f in $unpairedreads; do zcat \$f | seqkit fx2tab -n; done | sed -e "s/[ \\/].*\$//" | sort | uniq > unpairedhead.txt
     cat pairedhead.txt unpairedhead.txt > usedhead.txt
 
     # Extract reads

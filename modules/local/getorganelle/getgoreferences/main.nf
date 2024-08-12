@@ -30,8 +30,10 @@ process GETGOREFS {
         //val version //TODO add in a variable specifying the version number of databases to get
 
     output:
-        path("*Seed.fasta.gz"),  emit: seeds
+        path("*Seed.fasta.gz") , emit: seeds
         path("*Label.fasta.gz"), emit: labels
+        path "versions.yml"    , emit: versions
+
 
     when:
         task.ext.when == null || task.ext.when
@@ -62,6 +64,11 @@ process GETGOREFS {
         done
 
         gzip -n default_*.fasta
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            GetOrganelleDB: $version
+        END_VERSIONS
 
         """
 

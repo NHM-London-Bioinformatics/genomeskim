@@ -42,8 +42,8 @@
                 }
             }
         },
-        "eue_1": {
-            "title": "eue 1",
+        "general_options": {
+            "title": "General options",
             "type": "object",
             "description": "",
             "default": "",
@@ -110,14 +110,14 @@
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The percentage of bases that may be unqualified to retain a read",
-                    "default": 100,
+                    "default": 100.0,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nBy default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads. Decrease this value to perform quality filtering."
                 },
                 "fastp_quality_filter_phred": {
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The minimum phred score to qualify a base",
-                    "default": 15,
+                    "default": 15.0,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nNote that this parameter has no effect if --fastp_quality_filter_pclim is set to 100, the default. Thus by default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads."
                 },
                 "fastp_length_filter_min": {
@@ -125,7 +125,7 @@
                     "fa_icon": "fas fa-filter",
                     "description": "Minimum read length to be retained",
                     "help_text": "Passed through to `fastp --length_required`, see https://github.com/OpenGene/fastp#length-filter",
-                    "default": 15
+                    "default": 15.0
                 },
                 "fastp_save_outputs": {
                     "type": "boolean",
@@ -160,10 +160,9 @@
                     "description": "Maximum number of reads to use from inputs. Default: no limit"
                 },
                 "getorganelle_ref_action": {
-                    "type": "string"
-                },
-                "getorganelle_seed_use_ref": {
-                    "type": "boolean"
+                    "type": "string",
+                    "description": "Should the GetOrganelle default reference databases be used, and if so how.",
+                    "help_text": "If no custom references are specified (taxon or lineage for retrieval from GoFetch and/or reference(s) sequence files to --organellerefs), by default the pipeline will use the default GetOrganelle seed and label sequences.\nIf any custom references are supplied, seed and label sequences will instead derive from the custom references. To fine-tunes which sequences will be used as GetOrganelle seed and label in this case, use the following:\n`add_seeds`: combine the default GetOrganelle seeds with those derived from custom references\n`add_labels`: combine the default GetOrganelle labels with those derived from custom references\n`add_both`: combine both default Getorganelle seeds with custom reference seeds and default GetOrganelle labels with custom reference labels\n`only_seeds`: ignore the custom reference seeds and use only the default GetOrganelle seeds\n`only_labels`: ignore the custom reference genes and use only the default GetOrganelle labels\n`only_both: ignore the custom references entirely and use only the defaulte GetOrganelle seeds and labels"
                 },
                 "getorganelle_reducereads": {
                     "type": "integer",
@@ -198,13 +197,13 @@
                 }
             }
         },
-        "genomescope_options": {
-            "title": "GenomeScope options",
+        "genome_statistics_options": {
+            "title": "Genome Statistics options",
             "type": "object",
             "description": "",
             "default": "",
             "properties": {
-                "genomescope2_kmer": {
+                "genomestats_kmer": {
                     "type": "integer",
                     "default": 21
                 },
@@ -401,7 +400,7 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/eue_1"
+            "$ref": "#/definitions/general_options"
         },
         {
             "$ref": "#/definitions/gofetch_options"
@@ -416,7 +415,7 @@
             "$ref": "#/definitions/mitos_options"
         },
         {
-            "$ref": "#/definitions/genomescope_options"
+            "$ref": "#/definitions/genome_statistics_options"
         },
         {
             "$ref": "#/definitions/generic_options"
@@ -427,5 +426,11 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ]
+    ],
+    "properties": {
+        "jellyfish_s": {
+            "type": "string",
+            "default": "1G"
+        }
+    }
 }
