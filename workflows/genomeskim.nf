@@ -30,10 +30,9 @@ include { JELLYFISH                   } from '../modules/local/jellyfish'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-// This subworkflow is all about parsing and checking the samplesheet
-//include { INPUT_CHECK          } from '../subworkflows/local/input_check'
+
 include { PREPARE_REFS            } from '../subworkflows/local/prepare_refs'
-//include { ORGANELLE_VALIDATION   } from '../subworkflows/local/organelle_validation'
+include { ORGANELLE_VALIDATION   } from '../subworkflows/local/organelle_validation'
 include { ANNOTATION              } from '../subworkflows/local/annotation'
 
 /*
@@ -132,6 +131,11 @@ workflow GENOMESKIM {
         PREPARE_REFS.out.golabels
     )
 
+    // Split out and decompress contigs
+    // TODO rename contigs with input name
+    ch_contigs = GETORGANELLE.out.contigs.splitFasta(file: true, decompress: true)
+        .multiMap { i -> contigs4validation: contigs4annotation : i }
+
     // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
     ch_getorganelle_readuse = FASTP.out.reads.join(GETORGANELLE.out.pairedreads)
     ch_getorganelle_readuse = ch_getorganelle_readuse.join(GETORGANELLE.out.unpairedreads)
@@ -152,26 +156,30 @@ workflow GENOMESKIM {
         ch_nucreads,
         'nuclear'
     )
-/*
+
     //
     // Run contig validation
     //
-/*     ORGANELLE_VALIDATION(
+
+    ORGANELLE_VALIDATION(
         ch_cleanreads.mapreads,
-        GETORGANELLE.out.contigs,
+        ch_contigs.contigs4validation,
+        Channel.value( [ [:], params.blastdbpath ] ),
         params
     )
-    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions) */
+    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
 
     //
     // Run annotation
     //
-/*     ANNOTATION(
-//        ORGANELLE_VALIDATION.out.contigs,
-        GETORGANELLE.out.contigs,
+
+
+    ANNOTATION(
+        ch_contigs.contigs4annotation,
         ch_mitos_ref,
         params
-    ) */
+    )
+    ch_versions = ch_versions.mix(ANNOTATION.out.versions)
 
     //
     // Extract barcodes
@@ -185,9 +193,13 @@ workflow GENOMESKIM {
     JELLYFISH(CATREADS.out.catreads)
     GENOMESCOPE2(JELLYFISH.out.histo)
 
+    ch_versions = ch_versions.mix(JELLYFISH.out.versions.first())
+    ch_versions = ch_versions.mix(GENOMESCOPE2.out.versions.first())
+
     //
     // Collate and save software versions
     //
+
     softwareVersionsToYAML(ch_versions)
         .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
         .set { ch_collated_versions }

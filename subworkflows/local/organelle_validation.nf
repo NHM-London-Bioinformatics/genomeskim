@@ -10,6 +10,7 @@ workflow ORGANELLE_VALIDATION {
     take:
         ch_reads
         ch_contigsin
+        ch_blastdbpath
         params
 
     main:
@@ -24,9 +25,10 @@ workflow ORGANELLE_VALIDATION {
         //
         // MODULE: BLASTN
         //
+
         BLAST_BLASTN(
             ch_contigssplit.contigs4blast,
-            params.blastdbpath
+            ch_blastdbpath
         )
         ch_validation_versions = ch_validation_versions.mix(BLAST_BLASTN.out.versions)
 
@@ -34,7 +36,7 @@ workflow ORGANELLE_VALIDATION {
         // MODULE: MINIMAP2
         //
         MINIMAP2_ALIGN(
-            ch_reads
+            ch_reads,
             ch_contigssplit.contigs4map,
             true, // BAM format output
             false, // CIGAR PAF format
@@ -44,17 +46,14 @@ workflow ORGANELLE_VALIDATION {
 
         // MODULE: BLOBTOOLS
         BLOBTOOLS(
-            ch_contigs4blob
-            BLAST_BLASTN.out.txt
-            MINIMAP2_ALIGN.out.bam
+            ch_contigssplit.contigs4blob,
+            BLAST_BLASTN.out.txt,
+            MINIMAP2_ALIGN.out.bam,
             params.taxdumppath
         )
         ch_validation_versions = ch_validation_versions.mix(BLOBTOOLS.out.versions)
 
-        // TODO: Some filtering somewhere to remove contigs that we don't want
-
     // OUTPUT
     emit:
-        contigs  = //Some contigs channel
         versions = ch_validation_versions
 }

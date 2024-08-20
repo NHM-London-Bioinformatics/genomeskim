@@ -104,14 +104,28 @@ workflow PIPELINE_INITIALISATION {
     // Check for presence of any local files
     //
 
-    def checkPathParamList = [params.multiqc_config, params.organellerefs, params.fastp_adapter_fasta]
+    def checkPathParamList = [
+        params.multiqc_config,
+        params.organellerefs,
+        params.fastp_adapter_fasta,
+        params.blastdbpath,
+        params.taxdumppath
+        ]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     //
     // Stage any remote files
     //
+
     ch_mitos_ref = Channel.empty()
-    if (params.mitos_refdbid) { ch_mitos_ref = Channel.of( [ params.mitos_refdbid, file( params.mitos_ref_databases[params.mitos_refdbid]['file'] ) ] )}
+
+    if (params.mitos_refdbid) {
+        ch_mitos_ref = Channel.value( [
+            [id:params.mitos_refdbid],
+            file( params.mitos_ref_databases[params.mitos_refdbid]['file'] )
+            ] )
+        }
+
 
     emit:
     samplesheet = ch_samplesheet

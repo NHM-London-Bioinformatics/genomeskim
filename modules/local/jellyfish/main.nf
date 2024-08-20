@@ -43,12 +43,12 @@ process JELLYFISH {
             $args \\
             -C \\
             -t $task.cpus \\
-            $reads \\
+            <(zcat ${reads[0]}) <(zcat ${reads[1]}) \\
             -o ${prefix}.jf
 
         jellyfish histo \\
             -t $task.cpus \\
-            reads.jf > ${prefix}.histo
+            ptilo.jf > ${prefix}.histo
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

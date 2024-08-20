@@ -23,10 +23,10 @@ process BLOBTOOLS {
     //               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
     //               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "bioconda::blobtools=1.1.1"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/blobtools:1.1.1--py_1':
-        'biocontainers/blobtools:1.1.1--py_1' }"
+        'https://depot.galaxyproject.org/singularity/blobtoolkit:4.3.11':
+        'genomehubs/blobtoolkit:4.3.11' }"
 
     input:
         // TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
@@ -50,7 +50,8 @@ process BLOBTOOLS {
         task.ext.when == null || task.ext.when
 
     script:
-        def args = task.ext.args ?: ''
+        def filargs = task.ext.filargs ?: ''
+        def creargs = task.ext.crargs ?: ''
         def prefix = task.ext.prefix ?: "${meta.id}"
         // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
         //               If the software is unable to output a version number on the command-line then it can be manually specified
@@ -68,15 +69,17 @@ process BLOBTOOLS {
             --fasta $contig \
             --hits $blastn \
             --cov $bam \
-            $args \
-            ./ &> ${prefix}_blobtools_create.log
+            $filargs \
+            blobout/ &> ${prefix}_blobtools_create.log
 
         blobtools filter \
-            table table.tsv &> ${prefix}_blobtools_filter.log
+            $creargs \
+            --table table.tsv \
+            blobout &> ${prefix}_blobtools_filter.log
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            blobtools: \$(echo \$(blobtools --version 2>&1))' ))
+            blobtools: \$(blobtools --version | sed -e "s/blobtoolkit //")
         END_VERSIONS
         """
 

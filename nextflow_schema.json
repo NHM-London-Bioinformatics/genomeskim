@@ -110,14 +110,14 @@
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The percentage of bases that may be unqualified to retain a read",
-                    "default": 100.0,
+                    "default": 100,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nBy default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads. Decrease this value to perform quality filtering."
                 },
                 "fastp_quality_filter_phred": {
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The minimum phred score to qualify a base",
-                    "default": 15.0,
+                    "default": 15,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nNote that this parameter has no effect if --fastp_quality_filter_pclim is set to 100, the default. Thus by default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads."
                 },
                 "fastp_length_filter_min": {
@@ -125,7 +125,7 @@
                     "fa_icon": "fas fa-filter",
                     "description": "Minimum read length to be retained",
                     "help_text": "Passed through to `fastp --length_required`, see https://github.com/OpenGene/fastp#length-filter",
-                    "default": 15.0
+                    "default": 15
                 },
                 "fastp_save_outputs": {
                     "type": "boolean",
@@ -180,6 +180,20 @@
             "fa_icon": "fas fa-circle-notch",
             "help_text": ""
         },
+        "new_group_1": {
+            "title": "New Group 1",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "blastdbpath": {
+                    "type": "string"
+                },
+                "taxdumppath": {
+                    "type": "string"
+                }
+            }
+        },
         "mitos_options": {
             "title": "MITOS options",
             "type": "object",
@@ -187,7 +201,7 @@
             "default": "",
             "properties": {
                 "mitos_geneticcode": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "mitos_plots": {
                     "type": "boolean"
@@ -203,6 +217,10 @@
             "description": "",
             "default": "",
             "properties": {
+                "jellyfish_s": {
+                    "type": "string",
+                    "default": "1G"
+                },
                 "genomestats_kmer": {
                     "type": "integer",
                     "default": 21
@@ -210,6 +228,20 @@
                 "genomescope2_maxk": {
                     "type": "integer",
                     "default": 1000
+                }
+            }
+        },
+        "skipping_steps": {
+            "title": "Skipping steps",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "skip_validation": {
+                    "type": "boolean"
+                },
+                "skip_annotation": {
+                    "type": "boolean"
                 }
             }
         },
@@ -264,6 +296,10 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
+                    "hidden": true
+                },
+                "monochromeLogs": {
+                    "type": "boolean",
                     "hidden": true
                 },
                 "hook_url": {
@@ -412,10 +448,16 @@
             "$ref": "#/definitions/getorganelle_options"
         },
         {
+            "$ref": "#/definitions/new_group_1"
+        },
+        {
             "$ref": "#/definitions/mitos_options"
         },
         {
             "$ref": "#/definitions/genome_statistics_options"
+        },
+        {
+            "$ref": "#/definitions/skipping_steps"
         },
         {
             "$ref": "#/definitions/generic_options"
@@ -426,11 +468,5 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ],
-    "properties": {
-        "jellyfish_s": {
-            "type": "string",
-            "default": "1G"
-        }
-    }
+    ]
 }

@@ -9,15 +9,17 @@ process MITOS {
 
     input:
         tuple val(meta), path(contig)
-        path(db)
+        tuple val(meta), path(db)
 
     output:
-        path "output/result.bed"      , emit: bed
-        path "output/result.gff"      , emit: gff
-        path "versions.yml"           , emit: versions
+        tuple val(meta), path("output/result.bed"), emit: bed
+        tuple val(meta), path("output/result.gff"), emit: gff
+        tuple val(meta), path("output/result.fas"), emit: fas
+        tuple val(meta), path("output/result.faa"), emit: faa
+        path "versions.yml"                       , emit: versions
 
     when:
-    task.ext.when == null || task.ext.when
+        task.ext.when == null || task.ext.when
 
     script:
         def args = task.ext.args ?: ''
@@ -28,11 +30,10 @@ process MITOS {
         mkdir output
 
         runmitos.py \
-            --input <( zcat $contig )\
+            --input $contig \
             --outdir output/ \
             --refdir ./ \
             --refseqver $db \
-            --zip-files
             \$args \
             &> mitos.log
 
