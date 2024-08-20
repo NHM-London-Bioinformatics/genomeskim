@@ -17,10 +17,15 @@ process CATFASTA {
         task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+        def args = task.ext.args ?: ''
         """
         cat $files > ${prefix}_concat.fasta.gz
 
         """
 
+    stub:
+        def args = task.ext.args ?: ''
+        """
+        touch ${prefix}_concat.fasta.gz
+        """
 }
