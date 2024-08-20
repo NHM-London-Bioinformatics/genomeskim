@@ -1,7 +1,0 @@
-name: flash
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::flash=1.2.11
