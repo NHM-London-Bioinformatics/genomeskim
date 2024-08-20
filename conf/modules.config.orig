@@ -1,0 +1,159 @@
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Config file for defining DSL2 per module options and publishing paths
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Available keys to override module options:
+        ext.args   = Additional arguments appended to command in module.
+        ext.args2  = Second set of arguments appended to command in module (multi-tool modules).
+        ext.args3  = Third set of arguments appended to command in module (multi-tool modules).
+        ext.prefix = File name prefix for output files.
+----------------------------------------------------------------------------------------
+*/
+
+process {
+
+    publishDir = [
+        path: { "${params.outdir}/${task.process.tokenize(':')[-1].tokenize('_')[0].toLowerCase()}" },
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+    ]
+
+    withName: FASTQC {
+        ext.args = '--quiet'
+    }
+
+<<<<<<< HEAD
+    withName: CUSTOM_DUMPSOFTWAREVERSIONS {
+        publishDir = [
+            path: { "${params.outdir}/pipeline_info" },
+            mode: params.publish_dir_mode,
+            pattern: '*_versions.yml'
+        ]
+    }
+
+    withName: FASTP {
+        ext.args = [
+            // adapter options
+            params.fastp_disable_adapter_trim ? "--disable_adapter_trimming" : '',
+            // length filter options
+            params.fastp_length_filter_min ? "--length_required ${params.fastp_length_filter_min}" : "--disable_length_filtering",
+            // quality filter options
+            //params.fastp_quality_filter_phred || params.fastp_quality_filter_pclim ? '' : "--disable_quality_filtering",
+            params.fastp_quality_filter_phred ? "--qualified_quality_phred ${params.fastp_quality_filter_phred}" : '',
+            params.fastp_quality_filter_pclim ? "--unqualified_percent_limit ${params.fastp_quality_filter_pclim}" : ''
+        ].join(' ').trim()
+        //This will save all fastp outputs to this directory
+        publishDir = [
+            path: { "${params.outdir}/fastp/" },
+            mode: params.publish_dir_mode, // default set to copy (from the nextflow work dir)
+            pattern: '*', // If only want to save sequences, not html and json, set to '*.fastq.gz'
+            enabled: params.fastp_save_outputs
+        ]
+    }
+
+    withName: GETGOREFS {
+        ext.args = []
+        publishDir = []
+    }
+
+    withName: GETORGANELLE {
+        ext.args = [
+            // Specify genometype
+            params.getorganelle_genometype ? "-F ${params.getorganelle_genometype}" : '',
+            // Specify random seed
+            params.getorganelle_rseed ? "--random-seed ${params.getorganelle_rseed}" : '',
+            // Specifiy max params
+            params.getorganelle_maxreads ? "--max-reads ${params.getorganelle_maxreads}" : "--max-reads inf",
+            params.getorganelle_reducereads ? "--reduce-reads-for-coverage ${params.getorganell_reducereads}" : "--reduce-reads-for-coverage inf"
+        ].join(' ').trim()
+        publishDir = [
+            path: { "${params.outdir}/getorganelle/" },
+            mode: params.publish_dir_mode,
+            pattern: '*',
+            enabled: params.getorganelle_save_outputs
+        ]
+    }
+
+    withName: BLAST_BLASTN {
+        ext.args = [
+            "-outfmt '6 qseqid staxids bitscore std'",
+            "-max_target_seqs 10",
+            "-max_hsps 1",
+            "-evalue 1e-25"
+        ].join(' ').trim()
+        publishDir = []
+    }
+
+    withName: MINIMAP2_ALIGN {
+        ext.args = [
+            "-ax sr"
+        ].join(' ').trim()
+        ext.args2 = []
+        publishDir = []
+    }
+
+    withName: BLOBTOOLS {
+        ext.filargs = []
+        ext.creargs = [
+            "--table-fields gc,length,ptilo_cov,bestsumorder_superkingdom,bestsumorder_kingdom,bestsumorder_phylum,bestsumorder_class,bestsumorder_order,bestsumorder_family,bestsumorder_species"
+        ].join(' ').trim()
+        publishDir = []
+    }
+
+    withName: SPLITREADS {
+        ext.args = []
+        publishDir = []
+    }
+
+    withName: CATREADS {
+        ext.args = []
+        publishDir = []
+    }
+
+    withName: MITOS {
+        ext.args = [
+            // Specify code
+            "-c ${params.mitos_geneticcode}",
+            params.mitos_plots ?: "--noplots"
+        ].join(' ').trim()
+        publishDir = []
+    }
+
+    withName: JELLYFISH {
+        ext.args = [
+            // Specify kmer size
+            params.genomestats_kmer ? "-m ${params.genomestats_kmer}" : '',
+            params.jellyfish_s ? "-s ${params.jellyfish_s}" : '-s 1G'
+        ].join(' ').trim()
+    }
+
+    withName: GENOMESCOPE2 {
+        ext.gsargs = [
+            // Specify kmer size
+            params.genomestats_kmer ? "${params.genomestats_kmer}" : '',
+            // Specify read length
+            params.readlength ? "${params.readlength}" : '',
+            // Set output directory
+            'gsout/',
+            // Set maximum k-mer length
+            params.genomescope2_maxk ? "${params.genomescope2_maxk}" : '',
+            // Set verbosity
+            '1'
+        ].join(' ').trim()
+        publishDir = []
+    }
+
+    withName: MULTIQC {
+        ext.args   = params.multiqc_title ? "--title \"$params.multiqc_title\"" : ''
+=======
+    withName: 'MULTIQC' {
+        ext.args   = { params.multiqc_title ? "--title \"$params.multiqc_title\"" : '' }
+>>>>>>> TEMPLATE
+        publishDir = [
+            path: { "${params.outdir}/multiqc" },
+            mode: params.publish_dir_mode,
+            saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+        ]
+    }
+
+}
