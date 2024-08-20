@@ -1,0 +1,10 @@
+name: getorganelle
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - getorganelle =1.7.7.0
+  - spades =3.15.5
+  - scipy =1.11.3
+  - gzip =1.12
