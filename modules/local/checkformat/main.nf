@@ -51,7 +51,7 @@ process CHECKFORMAT {
 
         """
 
-    script:
+    stub:
         def args = task.ext.args ?: ''
         """
         type="unknown"

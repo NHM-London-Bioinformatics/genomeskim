@@ -36,7 +36,7 @@ process GBEXTRACT {
         END_VERSIONS
         """
 
-    script:
+    stub:
         // https://github.com/Kinggerm/GetOrganelle/wiki/FAQ#how-to-assemble-a-target-organelle-genome-using-my-own-reference
         def args = task.ext.args ?: ''
         """

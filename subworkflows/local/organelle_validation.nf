@@ -39,6 +39,7 @@ workflow ORGANELLE_VALIDATION {
             ch_reads,
             ch_contigssplit.contigs4map,
             true, // BAM format output
+            false, // BAM index extension
             false, // CIGAR PAF format
             false  // CIGAR BAM
         )

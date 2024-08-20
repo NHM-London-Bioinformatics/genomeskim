@@ -17,7 +17,7 @@ workflow ANNOTATION {
         //
         // MODULE: MITOS
         //
-        UNTAR(ch_mitos_ref.)
+        UNTAR(ch_mitos_ref)
 
         MITOS(
             ch_contigs,
@@ -26,8 +26,6 @@ workflow ANNOTATION {
         ch_annotation_versions = ch_annotation_versions.mix(MITOS.out.versions)
 
         // Convert the annotations somehow?
-
-
 
     emit:
         //annotations = //Some annotations channel
