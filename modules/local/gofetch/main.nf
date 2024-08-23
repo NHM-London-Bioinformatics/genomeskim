@@ -1,5 +1,5 @@
 process GOFETCH {
-    tag "${taxon}" ?: "${lineage}"
+    tag "${taxon}"
     label 'process_single'
 
     // TODO nf-core: List required Conda package(s).

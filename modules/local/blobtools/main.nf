@@ -14,9 +14,9 @@ process BLOBTOOLS {
         path(taxdump)
 
     output:
-        tuple val(meta), path('table.tsv'), emit: table
+        tuple val(meta), path('*_summary.tsv'), emit: table
         //TODO: MultiQC - currently not supported
-        path "versions.yml"           , emit: versions
+        path "versions.yml"                   , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
@@ -38,7 +38,7 @@ process BLOBTOOLS {
 
         blobtools filter \
             $creargs \
-            --table table.tsv \
+            --table ${prefix}_summary.tsv \
             blobout &> ${prefix}_blobtools_filter.log
 
         cat <<-END_VERSIONS > versions.yml
@@ -72,6 +72,7 @@ process BLOBTOOLS {
         mv *.json blobout/
 
         touch ${prefix}_blobtools_create.log
+        touch ${prefix}_summary.tsv
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

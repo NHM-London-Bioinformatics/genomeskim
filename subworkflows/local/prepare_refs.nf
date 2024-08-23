@@ -70,6 +70,9 @@ workflow PREPARE_REFS {
 
         // Get GetOrganelle references if needed, and then merge as necessary
         if ( params.getorganelle_ref_action || nocustom ) {
+
+            // TODO: remove this module in favour of staging automatically
+
             GETGOREFS(
                 Channel.fromList(params.getorganelle_genometype.tokenize(','))
             )

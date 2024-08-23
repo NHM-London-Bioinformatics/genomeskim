@@ -42,52 +42,6 @@
                 }
             }
         },
-        "general_options": {
-            "title": "General options",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "readlength": {
-                    "type": "string"
-                },
-                "organellerefs": {
-                    "type": "string"
-                }
-            }
-        },
-        "gofetch_options": {
-            "title": "GoFetch options",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "gofetch_taxon": {
-                    "type": "string"
-                },
-                "gofetch_lineage": {
-                    "type": "string"
-                },
-                "gofetch_target": {
-                    "type": "string"
-                },
-                "gofetch_db": {
-                    "type": "string",
-                    "default": "refseq"
-                },
-                "gofetch_minn": {
-                    "type": "integer",
-                    "default": 10
-                },
-                "gofetch_maxn": {
-                    "type": "integer",
-                    "default": 100
-                },
-                "gofetch_entrezemail": {
-                    "type": "string"
-                }
-            }
-        },
         "adapter_removal_and_filtering": {
             "title": "Adapter removal and filtering",
             "type": "object",
@@ -126,15 +80,65 @@
                     "description": "Minimum read length to be retained",
                     "help_text": "Passed through to `fastp --length_required`, see https://github.com/OpenGene/fastp#length-filter",
                     "default": 15
-                },
-                "fastp_save_outputs": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check-square",
-                    "description": "Save all fastp output files in outdir"
                 }
             },
             "help_text": "Parameters for removing trimming adapter sequences, quality filtering and length filtering.",
             "fa_icon": "fas fa-filter"
+        },
+        "custom_reference_options": {
+            "title": "Custom reference options",
+            "type": "object",
+            "description": "Options for supplying custom references to organelle assembly",
+            "default": "",
+            "properties": {
+                "organellerefs": {
+                    "type": "string",
+                    "description": "Path to a fasta or genbank format file containing reference organelle sequences",
+                    "help_text": "Genbank-format flat file is recommended, in which case both the organelle and gene sequences will be used for GetOrganelle.",
+                    "format": "file-path"
+                },
+                "gofetch_taxon": {
+                    "type": "string",
+                    "description": "Taxon or taxid of rank to search for, e.g. \"3702\" or \"Arabidopsis\". Required to use GoFetch"
+                },
+                "gofetch_target": {
+                    "type": "string",
+                    "enum": ["chloroplast", "mitochondrion", "ribosomal", "ribosomal_complete"],
+                    "description": "Sequence type to retrieve. Required to use GoFetch"
+                },
+                "gofetch_db": {
+                    "type": "string",
+                    "default": "refseq",
+                    "enum": ["refseq", "genbank"],
+                    "description": "Database to search, must be one of \"genbank\" or \"refseq\" (default)"
+                },
+                "gofetch_minn": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimum number of target sequences to download - fewer sequences will speed up runtime"
+                },
+                "gofetch_maxn": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Maximum number of sequences to download - more sequences may increase assembly quality"
+                },
+                "gofetch_entrezemail": {
+                    "type": "string",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "description": "Email address for Entrez API queries, required to use GoFetch",
+                    "help_text": "This should be an email address that you have registered with NCBI"
+                },
+                "gofetch_entrezapikey": {
+                    "type": "string",
+                    "description": "API key for Entrez API queries, optional but may speed up runtime",
+                    "help_text": "See https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us for how to get an API key"
+                },
+                "gofetch_save_outputs": {
+                    "type": "boolean",
+                    "description": "Save downloaded data in outdir"
+                }
+            },
+            "help_text": "The pipeline supports three ways for supplying references. If no custom references are supplied, the pipeline uses the default GetOrganelle references based on the genometype supplied to --getorganelle_genometype. Additional or alternative references can be used by supplying a file of referencese to --organellerefs and/or by using the go_fetch.py script to retrieve reference sequences from NCBI for a given taxon. Supplying a value to --gofetch_taxon will switch on using GoFetch; for more information see https://github.com/o-william-white/go_fetch.\nTo select which references to actually use for GetOrganelle and how, see --getorganelle_ref_action."
         },
         "getorganelle_options": {
             "title": "GetOrganelle options",
@@ -146,7 +150,19 @@
                     "type": "string",
                     "help_text": "Passed through to `get_organelle_from_reads.py -F`. Must be one or more (comma-separated list) of:\nembplant_pt\nother_pt\nembplant_mt\nembplant_nr\nanimal_mt\nfungus_mt\nfungus_nr\nanonym\nSee https://github.com/Kinggerm/GetOrganelle/wiki/Usage#get_organelle_from_readspy",
                     "fa_icon": "fas fa-book",
-                    "description": "Target organelle genome type, in GetOrganelle format"
+                    "description": "Target organelle genome type, in GetOrganelle format",
+                    "enum": [
+                        "embplant_pt",
+                        "other_pt",
+                        "embplant_mt",
+                        "embplant_nr",
+                        "animal_mt",
+                        "fungus_mt",
+                        "fungus_nr",
+                        "anonym",
+                        "embplant_pt,embplant_mt",
+                        "other_pt,embplant_mt,fungus_mt"
+                    ]
                 },
                 "getorganelle_rseed": {
                     "type": "integer",
@@ -162,7 +178,8 @@
                 "getorganelle_ref_action": {
                     "type": "string",
                     "description": "Should the GetOrganelle default reference databases be used, and if so how.",
-                    "help_text": "If no custom references are specified (taxon or lineage for retrieval from GoFetch and/or reference(s) sequence files to --organellerefs), by default the pipeline will use the default GetOrganelle seed and label sequences.\nIf any custom references are supplied, seed and label sequences will instead derive from the custom references. To fine-tunes which sequences will be used as GetOrganelle seed and label in this case, use the following:\n`add_seeds`: combine the default GetOrganelle seeds with those derived from custom references\n`add_labels`: combine the default GetOrganelle labels with those derived from custom references\n`add_both`: combine both default Getorganelle seeds with custom reference seeds and default GetOrganelle labels with custom reference labels\n`only_seeds`: ignore the custom reference seeds and use only the default GetOrganelle seeds\n`only_labels`: ignore the custom reference genes and use only the default GetOrganelle labels\n`only_both: ignore the custom references entirely and use only the defaulte GetOrganelle seeds and labels"
+                    "help_text": "If no custom references are specified (taxon for retrieval from GoFetch and/or reference(s) sequence files to --organellerefs), by default the pipeline will use the default GetOrganelle seed and label sequences.\nIf any custom references are supplied, seed and label sequences will instead derive from the custom references. To fine-tune which sequences will be used as GetOrganelle seed and label in this case, use the following:\n`add_seeds`: combine the default GetOrganelle seeds with those derived from custom references\n`add_labels`: combine the default GetOrganelle labels with those derived from custom references\n`add_both`: combine both default Getorganelle seeds with custom reference seeds and default GetOrganelle labels with custom reference labels\n`only_seeds`: ignore the custom reference seeds and use only the default GetOrganelle seeds\n`only_labels`: ignore the custom reference genes and use only the default GetOrganelle labels\n`only_both: ignore the custom references entirely and use only the defaulte GetOrganelle seeds and labels",
+                    "enum": ["add_seeds", "add_labels", "add_both", "only_seeds", "only_labels", "only_both"]
                 },
                 "getorganelle_reducereads": {
                     "type": "integer",
@@ -180,68 +197,84 @@
             "fa_icon": "fas fa-circle-notch",
             "help_text": ""
         },
-        "new_group_1": {
-            "title": "New Group 1",
+        "validation_options": {
+            "title": "Validation options",
             "type": "object",
-            "description": "",
+            "description": "Options for performing automated checks on GetOrganelle outputs",
             "default": "",
             "properties": {
+                "skip_validation": {
+                    "type": "boolean",
+                    "description": "Skip validation processes"
+                },
                 "blastdbpath": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to a directory containing a BLAST-format reference database",
+                    "help_text": "The reference database must have been created using the -taxid_map to map NCBI taxids to entries. Local copies of nt, nr or refseq will work, but may be quite slow, better to use a curated database comprising your taxon of interest AND a selection of potential contaminants"
                 },
                 "taxdumppath": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to a local copy of the NCBI taxdump directory",
+                    "help_text": "See https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_readme.txt"
                 }
             }
         },
-        "mitos_options": {
-            "title": "MITOS options",
+        "annotation_options": {
+            "title": "Annotation options",
             "type": "object",
-            "description": "",
+            "description": "Options for performing annotation on mitochondrial contigs",
             "default": "",
             "properties": {
+                "skip_annotation": {
+                    "type": "boolean",
+                    "description": "Skip annotation process - recommended for non-mitochondrial data"
+                },
                 "mitos_geneticcode": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Genetic code for annotation",
+                    "help_text": "See https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi"
                 },
                 "mitos_plots": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Create annotation plots - will be slower"
                 },
                 "mitos_refdbid": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Specify one of six MITOS2 reference databases",
+                    "help_text": "See https://dx.doi.org/10.5281/zenodo.4284483",
+                    "enum": ["refseq63f", "refseq63m", "refseq63o", "refseq89f", "refseq89m", "refseq89o"]
                 }
             }
         },
         "genome_statistics_options": {
             "title": "Genome Statistics options",
             "type": "object",
-            "description": "",
+            "description": "Options for computing genome summaries on the non-organellar reads",
             "default": "",
             "properties": {
-                "jellyfish_s": {
-                    "type": "string",
-                    "default": "1G"
+                "skip_genomestats": {
+                    "type": "boolean",
+                    "description": "Skip genome statistics"
                 },
                 "genomestats_kmer": {
                     "type": "integer",
-                    "default": 21
+                    "default": 21,
+                    "description": "K-mer length for kmer counting. Default: 21",
+                    "help_text": "Passed to the -m option in Jellyfish2 and the -k option in Genomescope2"
                 },
-                "genomescope2_maxk": {
+                "jellyfish_s": {
+                    "type": "string",
+                    "default": "1G",
+                    "description": "Initial hash size for jellyfish2. Default: 1G"
+                },
+                "genomescope2_ploidy": {
                     "type": "integer",
-                    "default": 1000
-                }
-            }
-        },
-        "skipping_steps": {
-            "title": "Skipping steps",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "skip_validation": {
-                    "type": "boolean"
-                },
-                "skip_annotation": {
-                    "type": "boolean"
+                    "default": 2,
+                    "description": "Ploidy for Genomescope2 to use. Default: 2",
+                    "minimum": 1,
+                    "maximum": 6
                 }
             }
         },
@@ -436,28 +469,22 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/general_options"
-        },
-        {
-            "$ref": "#/definitions/gofetch_options"
-        },
-        {
             "$ref": "#/definitions/adapter_removal_and_filtering"
+        },
+        {
+            "$ref": "#/definitions/custom_reference_options"
         },
         {
             "$ref": "#/definitions/getorganelle_options"
         },
         {
-            "$ref": "#/definitions/new_group_1"
+            "$ref": "#/definitions/validation_options"
         },
         {
-            "$ref": "#/definitions/mitos_options"
+            "$ref": "#/definitions/annotation_options"
         },
         {
             "$ref": "#/definitions/genome_statistics_options"
-        },
-        {
-            "$ref": "#/definitions/skipping_steps"
         },
         {
             "$ref": "#/definitions/generic_options"
@@ -472,7 +499,8 @@
     "properties": {
         "pipelines_testdata_base_path": {
             "type": "string",
-            "default": "https://raw.githubusercontent.com/nf-core/test-datasets/"
+            "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+            "hidden": true
         }
     }
 }
