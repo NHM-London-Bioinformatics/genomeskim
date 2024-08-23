@@ -25,11 +25,11 @@ workflow PREPARE_REFS {
         ch_golabels = Channel.empty()
 
         referenceformat = ''
-        nocustom = !params.gofetch_taxon & !params.gofetch_lineage & !params.organellerefs
+        nocustom = !params.gofetch_taxon & !params.organellerefs
 
         // If taxon or lineage are supplied
-        if ( params.gofetch_taxon || params.gofetch_lineage ){
-            GOFETCH(params.gofetch_taxon, params.gofetch_lineage)
+        if ( params.gofetch_taxon ){
+            GOFETCH( params.gofetch_taxon )
 
             ch_orgseqs = ch_orgseqs.mix(GOFETCH.out.seqs)
             ch_orggenes = ch_orggenes.mix(GOFETCH.out.genes)
@@ -60,7 +60,7 @@ workflow PREPARE_REFS {
         }
 
         // Merge files
-        if ( params.gofetch_taxon || params.gofetch_lineage || params.organellerefs ){
+        if ( params.gofetch_taxon || params.organellerefs ){
 
             CATFASTAORG(ch_orgseqs.collect(), "org")
             CATFASTAGENE(ch_orggenes.collect(), "gene")
@@ -77,7 +77,7 @@ workflow PREPARE_REFS {
             ch_preprefs_versions = ch_preprefs_versions.mix(GETGOREFS.out.versions)
 
             // Store the seeds and/or labels in the relevant channels if they're being used
-            // params.getorganelle_ref_action should be only_both if none of taxon/lineage/reference are supplied
+            // params.getorganelle_ref_action should be only_both if none of taxon/reference are supplied
             if ( params.getorganelle_ref_action in ['add_seeds', 'add_both', 'only_seeds', 'only_both'] || nocustom ) {
 
                 ch_goseeds = ch_goseeds.mix(GETGOREFS.out.seeds)
@@ -104,12 +104,12 @@ workflow PREPARE_REFS {
 
         } else {
             ch_goseeds = ch_orgseqs
-            if ( params.gofetch_taxon || params.gofetch_lineage || referenceformat == 'gb' ){
+            if ( params.gofetch_taxon|| referenceformat == 'gb' ){
                 ch_golabels = ch_orggenes
             } else {
                 def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     " Error: the parameter combination supplied has not resulted in any gene  \n" +
-                    " sequences. Either supply a taxon or lineage to retrieve from GoFetch,   \n" +
+                    " sequences. Either supply a taxon to retrieve from GoFetch,   \n" +
                     " specify reference(s) in genbank format, or set --getorganelle_ref_action\n" +
                     " to add_labels, add_both or only_both to use the GetOrganelle defaults   \n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

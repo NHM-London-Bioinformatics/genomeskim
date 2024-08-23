@@ -13,7 +13,6 @@ process GOFETCH {
 
     input:
         val taxon
-        val lineage
 
     output:
         path "output/database/gene.fasta.gz", emit: genes
@@ -30,22 +29,12 @@ process GOFETCH {
 
         fullargs="--download --output output/ --db database $args"
 
-        if [ $taxon ]
-        then
-            python go_fetch.py \\
-            --taxonomy $taxon \\
-            \$fullargs
-        else if [ $lineage ]
-        then
-            python go_fetch.pf \\
-            --lineage $lineage \\
-            \$fullargs
-        else
-            >&2 echo "Error: no lineage or taxon available to use for go_fetch.py."
-            exit 1
-        fi
+        python go_fetch.py \\
+        --taxonomy $taxon \\
+        \$fullargs
 
         gzip output/database/*.fasta
+        gzip output/database/*.gb
 
         #cat <<-END_VERSIONS > versions.yml
         #"${task.process}":
