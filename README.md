@@ -19,28 +19,29 @@
 
 ## Introduction
 
-**nf-core/genomeskim** is a bioinformatics pipeline that ...
+**nf-core/genomeskim** is a bioinformatics pipeline that is designed for batch processing of low-coverage genomic DNA sequencing. It is currently designed for and tested on Illumina sequencing data, and takes as input raw sequence reads from shotgun sequencing of a single individual in order to 1. assemble, validate and annotate putative organelle genomes and 2. calculate summary genome statistics based on the non-organellar reads recovered.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+<p align="center">
+    <img src="docs/images/pipeline_v5.png" alt="nf-core/genomeskim workflow overview" width="60%">
+</p>
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
+By default, the pipeline currently performs the following:
+
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+2. Adapter trimming ([`FastP`]())
+3. Organelle assembly ([`GetOrganelle`]())
+4. Taxonomic and coverage validation of contigs ([`BLAST`](), [`Minimap2`](), [`Blobtoolkit`]())
+5. Annotation of mitogenomes only ([`MITOS2`]())
+6. Nuclear genome summary statistics ([`Jellyfish`](), [`Genomescope2`]())
+7. Pipeline QC summaries ([`MultiQC`](http://multiqc.info/))
+
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
 
 First, prepare a samplesheet with your input data that looks as follows:
 
@@ -53,18 +54,23 @@ CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
 
--->
+Second, you need to know what sort of organellar genome you're trying to assemble, its genetic code and select a database to use for annotation.
 
 Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
 nextflow run nf-core/genomeskim \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir <OUTDIR> \
+   --getorganelle_genometype <GENOMETYPE> \
+   --mitos_geneticcode <CODE> \
+   --mitos_refdbid <DB> \
+   --skip_validation
+
 ```
+
+This minimal example skips validation as this requires further input files. If you want to undertake taxonomic validation, you need a BLAST database to compare against and a local copy of [NCBI taxdump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/).
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
@@ -80,11 +86,12 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/genomeskim was originally written by Thomas J. Creedy.
+nf-core/genomeskim was originally written by [Thomas J. Creedy](https://github.com/tjcreedy), based in part on a pipeline developed by [Oliver White](https://github.com/o-william-white), for use at the [Natural History Museum](https://www.nhm.ac.uk).
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+We thank the following people for their assistance in the development of this pipeline:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+[Silvia Salatino](https://github.com/silvia-s), [Matt Clark](https://www.nhm.ac.uk/our-science/departments-and-staff/staff-directory/matt-clark.html)
+
 
 ## Contributions and Support
 

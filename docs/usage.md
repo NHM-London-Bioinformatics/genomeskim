@@ -6,47 +6,64 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+**nfcore/genomeskim** undertakes several key steps by default, but most can be skipped. While few inputs are required by default, outputs will be improved by tailoring the pipeline to your data.
+
+### Organelle assembly
+
+<!-- TODO: links for all parameters -->
+
+**nfcore/genomeskim** always performs organelle assembly using the [GetOrganelle](https://github.com/Kinggerm/GetOrganelle) toolkit; the only parameterisation of this process that is required is to specify the type of organelle expected using [`--getorganelle_genometype`](LINK). However, it is recommended to review the guidance for running GetOrganelle and configure this to your dataset, in particular the `--getorganelle_wordsize` and `--getorganelle_kmers`.
+
+#### Reference datasets
+
+GetOrganelle uses two reference datasets to aid in assembly: complete reference organelle sequences ("seeds") and sequences of protein coding genes expected to be present ("labels"). By default, **nfcore/genomeskim** will use GetOrganelle's own reference database for each of the genome types it supports. However, these databases are very generic and improved assemblies can be achieved by using references from close relatives of the target. **nfcore/genomeskim** provides two additional or alternative ways of supplying references for GetOrganelle.
+
+**File**:  A custom set of references can be supplied as a file to `--organellerefs`. If this file is a genbank flat file, the complete sequences will be used for "seed" references and any protein coding gene sequences will be used as "label" references,
+
+**Fetch**: A taxon name or NCBI taxid can be supplied to `--gofetch_taxon` and organelle type to `--gofetch_target`, in which case the pipeline will use the GoFetch script to retrieve a set of the taxonomically closest available sequences from GenBank or RefSeq. For more details on how GoFetch works, see [its github](https://github.com/o-william-white/go_fetch)
+
+The pipeline can combine any of the GetOrganelle default, File, or Fetched references into each of the "seeds" and "labels" required by GetOrganelle using the `--getorganelle_ref_action` argument.
+
+### Organelle validation
+
+**nfcore/genomeskim** performs a taxonomic and coverage estimation of assembled organelle contigs by default, for use in validation. A BLAST search against a suitable database is used to assign taxonomy to the contigs, and reads are mapped against the contigs to estimate coverage, with the outputs of both collated by BlobToolKit.
+
+If validation is required, you must supply a path to a BLAST database to `--blastdbpath`, against which the contigs will be searched. This can either be a local copy of an NCBI database such as nt, nr or refseq, or a custom database. If a custome database, it must have been created using the `-taxid_map` argument of `makeblastdb` to map NCBI taxids to entries. A curated database comprising your taxon of interest AND a selection of potential contaminants is likely to be much faster than using local copies of NCBI databases. You must also supply a path to `--taxdumppath` that is a directory containing the [NCBI taxdump files](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/) - see the [readme](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_readme.txt).
+
+This step can be skipped using `--skip_validation`.
+
+### Annotation
+
+**nfcore/genomeskim** performs annotation of any contigs; currently, only mitochondrial sequences are supported using MITOS. You must specify the genetic code and the database to use for annotation. This step can be skipped using `--skip_validation`, which currently should be used for non-mitochondrial organelles.
+
+
+### Genome statistics
+
+**nfcore/genomeskim** estimates summary genome statistics using kmer counting by default. These are performed on the reads that are not used for organelle assembly by GetOrganelle, so be aware that a more accurate organelle assembly will change the outputs here. If your target organism is not diploid, ensure you specify a different value to `--genomescope2_ploidy`. This step can be skipped using `--skip_genomestats`
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the `--input` parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
-
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
 ### Full samplesheet
 
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 3 samples:.
 
 ```csv title="samplesheet.csv"
 sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+SAMPLE1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
+SAMPLE3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
 ```
 
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `sample`  | Custom sample name. All sample names must be different. Spaces in sample names are automatically converted to underscores (`_`). |
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 
@@ -54,13 +71,52 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 
 ## Running the pipeline
 
-The typical command for running the pipeline is as follows:
+This is an example command for running the pipeline on a set of insect samples using the default GetOrganelle databases:
 
 ```bash
-nextflow run nf-core/genomeskim --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/genomeskim \
+   -profile docker \
+   --input samplesheet.csv \
+   --outdir genomeskimout/ \
+   --getorganelle_genometype animal_mt \
+   --mitos_geneticcode 5 \
+   --mitos_refdbid refseq89m \
+   --blastdbpath blast/nt/ \
+   --taxdumppath blast/taxdump/
 ```
+The user has specified the genetic code for insect mitochondria (5), one of the six available reference databases for MITOS annotation, and paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This is a different example command for running the pipeline on a set of plant samples using GoFetch to retrieve reference sequences and combine these with the default GetOrganelle databases:
+```bash
+nextflow run nf-core/genomeskim \
+   -profile singularity \
+   --input samplesheet.csv \
+   --outdir genomeskimout/ \
+   --getorganelle_genometype embplant_pt \
+   --gofetch_taxon Arabidopsis \
+   --gofetch_target chloroplast \
+   --gofetch_entrezemail plantlover@kew.org.uk \
+   --getorganelle_ref_action add_both \
+   --skip_annotation \
+   --blastdbpath blast/nt/ \
+   --taxdumppath blast/taxdump/
+```
+The user has skipped annotation as chloroplast annotation is not currently available, and supplied paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
+
+Here's a final example command for running the pipeline on a set of fungal samples, supplying a genbank flat file comprising reference sequences - by default these will be used instead of the default GetOrganelle databases:
+```bash
+nextflow run nf-core/genomeskim \
+   -profile conda \
+   --input samplesheet.csv \
+   --outdir genomeskimout/ \
+   --getorganelle_genometype  fungus_mt\
+   --organellrefs psilocybe_refs.gb \
+   --mitos_geneticcode 4 \
+   --mitos_refdbid refseq63f \
+   --blastdbpath blast/hymenogastraceae_db/ \
+   --taxdumppath blast/taxdump/
+```
+The user has skipped annotation as chloroplast annotation is not currently available, and supplied paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `conda` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -79,7 +135,7 @@ Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 :::
 
-The above pipeline run specified with a params file in yaml format:
+The first example command specified with a params file in yaml format:
 
 ```bash
 nextflow run nf-core/genomeskim -profile docker -params-file params.yaml
@@ -88,10 +144,16 @@ nextflow run nf-core/genomeskim -profile docker -params-file params.yaml
 with `params.yaml` containing:
 
 ```yaml
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
+input: samplesheet.csv
+outdir: genomeskimout/
+getorganelle_genometype: embplant_pt
+gofetch_taxon: Arabidopsis
+gofetch_target: chloroplast
+gofetch_entrezemail: plantlover@kew.org.uk
+getorganelle_ref_action: add_both
+skip_annotation
+blastdbpath: blast/nt/
+taxdumppath: blast/taxdump/
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
