@@ -9,13 +9,13 @@ process MITOS {
 
     input:
         tuple val(meta), path(contig)
-        tuple val(meta), path(db)
+        tuple val(dbmeta), path(db)
 
     output:
-        tuple val(meta), path("output/result.bed"), emit: bed
-        tuple val(meta), path("output/result.gff"), emit: gff
-        tuple val(meta), path("output/result.fas"), emit: fas
-        tuple val(meta), path("output/result.faa"), emit: faa
+        tuple val(meta), path("${meta.id}.bed"), emit: bed
+        tuple val(meta), path("${meta.id}.gff"), emit: gff
+        tuple val(meta), path("${meta.id}.fas"), emit: fas
+        tuple val(meta), path("${meta.id}.faa"), emit: faa
         path "versions.yml"                       , emit: versions
 
     when:
@@ -23,7 +23,7 @@ process MITOS {
 
     script:
         def args = task.ext.args ?: ''
-        def prefix = task.ext.prefix ?: "${meta.id}"
+        def prefix = "${meta.id}"
         """
         args=\$(grep -q "circular" $contig && echo "$args" || echo "$args --linear")
 
@@ -37,6 +37,8 @@ process MITOS {
             \$args \
             &> mitos.log
 
+        for f in output/result*; do mv $f ${prefix}.${f##*.}; done
+
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
             runmitos.py: \$(runmitos.py --version 2>&1 | sed 's/^.*runmitos.py //' )
@@ -45,13 +47,13 @@ process MITOS {
 
     stub:
         def args = task.ext.args ?: ''
-        def prefix = task.ext.prefix ?: "${meta.id}"
+        def prefix = "${meta.id}"
         """
         mkdir output
 
         for i in bed gff fas faa;
         do
-            touch output/result.\$i
+            touch $prefix.\$i
         done
 
         cat <<-END_VERSIONS > versions.yml
