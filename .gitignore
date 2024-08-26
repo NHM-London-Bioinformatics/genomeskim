@@ -7,3 +7,4 @@ testing/
 testing*
 *.pyc
 pipeline_v4_WAH.png
+.Trash*
