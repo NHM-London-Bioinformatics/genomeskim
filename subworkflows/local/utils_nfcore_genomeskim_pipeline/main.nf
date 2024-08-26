@@ -183,8 +183,36 @@ workflow PIPELINE_COMPLETION {
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
-    //genomeExistsError()
-    //TODO check params.getorganelle_genometype value(s) are valid
+    if ( !params.input ) {
+        error("Missing --input: a samplesheet must be provided")
+    }
+
+    if ( params.gofetch_taxon ) {
+        if ( ! (params.gofetch_target  && params.gofetch_entrezemail) ) {
+        error("Missing --gofetch_target and --gofetch_entrezemail; both are required to use gofetch")
+        }
+    }
+
+    if ( params.getorganelle_ref_action in ["add_seeds", "add_labels", "add_both"] && ! (params.gofetch_target || params.organellerefs) ) {
+        error("You've used an \"add_\" action for --getorganelle_ref_action, but this requires --organellerefs and/or --gofetch_taxon")
+    }
+
+    if ( !params.skip_validation && ! ( params.blastdbpath && params.taxdumppath ) ){
+        error("Both --blastdbpath and --taxdumppath are required for validation")
+    }
+
+    if ( params.skip_validation && ( params.blastdbpath || params.taxdumppath) ){
+        error("When skipping validation using --skip_validation, neither --blastdbpath or --taxdumppath are needed")
+    }
+
+    if ( !params.skip_annotation && ! ( params.mitos_geneticcode && params.mitos_refdbid ) ){
+        error("Both --mitos_geneticcode and --mitos_refdbid are required for annotation")
+    }
+
+    if ( params.skip_annotation && ( params.mitos_geneticcode || params.mitos_refdbid ) ){
+        error("When skipping annotation using --skip_annotation, none of --mitos_geneticcode, --mitos_refdbid or --mitos_plots are needed")
+    }
+
 }
 
 //
@@ -204,28 +232,7 @@ def validateInputSamplesheet(input) {
 //
 // Get attribute from genome config file e.g. fasta
 //
-/* def getGenomeAttribute(attribute) {
-    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-        if (params.genomes[ params.genome ].containsKey(attribute)) {
-            return params.genomes[ params.genome ][ attribute ]
-        }
-    }
-    return null
-} */
 
-//
-// Exit pipeline if incorrect --genome key provided
-//
-/* def genomeExistsError() {
-    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-            "  Currently, the available genome keys are:\n" +
-            "  ${params.genomes.keySet().join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
-    }
-} */
 
 //
 // Generate methods description for MultiQC

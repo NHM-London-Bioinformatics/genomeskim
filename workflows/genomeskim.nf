@@ -111,10 +111,9 @@ workflow GENOMESKIM {
     //
     // MODULE: Run fastp
     //
-    fastp_adapter_fasta = params.fastp_adapter_fasta ?: []
     FASTP (
         ch_samplesheet,
-        fastp_adapter_fasta, // Just passing a value, no need for this to be a channel
+        params.fastp_adapter_fasta ?: [], // Just passing a value, no need for this to be a channel
         false,
         false,
         false
