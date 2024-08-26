@@ -164,6 +164,19 @@
                         "other_pt,embplant_mt,fungus_mt"
                     ]
                 },
+                "getorganelle_wordsize": {
+                    "type": "number",
+                    "description": "The word size for GetOrganelle. Default: auto-estimated by GetOrganelle",
+                    "help_text": "For more details, see https://github.com/Kinggerm/GetOrganelle?tab=readme-ov-file#starting-from-reads",
+                    "minimum": 0
+                },
+                "getorganelle_kmers": {
+                    "type": "string",
+                    "default": "21,55,85,115",
+                    "description": "Kmer(s) to use for assembly with SPAdes within GetOrganelle. Default: 21,55,85,115",
+                    "help_text": "One or several kmers should be supplied, separated by commas. Multiple kmers are recommended, see https://github.com/Kinggerm/GetOrganelle?tab=readme-ov-file#starting-from-reads for more information.",
+                    "pattern": "^\\d+(?:,\\d+)*$"
+                },
                 "getorganelle_rseed": {
                     "type": "integer",
                     "default": 12345,
@@ -186,11 +199,6 @@
                     "help_text": "Default inf: no reducing of reads for coverage",
                     "fa_icon": "fas fa-sort-down",
                     "description": "Maximum number of reads according to coverage. Default: no limit"
-                },
-                "getorganelle_save_outputs": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check-square",
-                    "description": "Save all getorganelle output files in outdir"
                 }
             },
             "required": ["getorganelle_genometype"],
@@ -246,7 +254,8 @@
                     "help_text": "See https://dx.doi.org/10.5281/zenodo.4284483",
                     "enum": ["refseq63f", "refseq63m", "refseq63o", "refseq89f", "refseq89m", "refseq89o"]
                 }
-            }
+            },
+            "required": ["mitos_geneticcode"]
         },
         "genome_statistics_options": {
             "title": "Genome Statistics options",
