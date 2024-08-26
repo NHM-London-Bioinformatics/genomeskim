@@ -37,7 +37,7 @@ process MITOS {
             \$args \
             &> mitos.log
 
-        for f in output/result*; do mv $f ${prefix}.${f##*.}; done
+        for f in output/result*; do mv \$f ${prefix}.\${f##*.}; done
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
