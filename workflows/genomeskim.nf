@@ -161,25 +161,28 @@ workflow GENOMESKIM {
     // Run contig validation
     //
 
-    ORGANELLE_VALIDATION(
-        ch_cleanreads.mapreads,
-        ch_contigs.contigs4validation,
-        Channel.value( [ [:], params.blastdbpath ] ),
-        params
-    )
-    ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+    if ( !params.skip_validation ) {
+        ORGANELLE_VALIDATION(
+            ch_cleanreads.mapreads,
+            ch_contigs.contigs4validation,
+            Channel.value( [ [:], params.blastdbpath ] ),
+            params
+        )
+        ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+    }
 
     //
     // Run annotation
     //
 
-
-    ANNOTATION(
-        ch_contigs.contigs4annotation,
-        ch_mitos_ref,
-        params
-    )
-    ch_versions = ch_versions.mix(ANNOTATION.out.versions)
+    if ( !params.skip_annotation ) {
+        ANNOTATION(
+            ch_contigs.contigs4annotation,
+            ch_mitos_ref,
+            params
+        )
+        ch_versions = ch_versions.mix(ANNOTATION.out.versions)
+    }
 
     //
     // Extract barcodes
@@ -190,11 +193,13 @@ workflow GENOMESKIM {
     // Genome statistics
     //
 
-    JELLYFISH(CATREADS.out.catreads)
-    GENOMESCOPE2(JELLYFISH.out.histo)
+    if ( !params.skip_genomestats ) {
+        JELLYFISH(CATREADS.out.catreads)
+        GENOMESCOPE2(JELLYFISH.out.histo)
 
-    ch_versions = ch_versions.mix(JELLYFISH.out.versions.first())
-    ch_versions = ch_versions.mix(GENOMESCOPE2.out.versions.first())
+        ch_versions = ch_versions.mix(JELLYFISH.out.versions.first())
+        ch_versions = ch_versions.mix(GENOMESCOPE2.out.versions.first())
+    }
 
     //
     // Collate and save software versions
