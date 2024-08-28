@@ -90,7 +90,7 @@ nf-core/genomeskim was originally written by [Thomas J. Creedy](https://github.c
 
 We thank the following people for their assistance in the development of this pipeline:
 
-[Silvia Salatino](https://github.com/silvia-s), [Matt Clark](https://www.nhm.ac.uk/our-science/departments-and-staff/staff-directory/matt-clark.html)
+[Silvia Salatino](https://www.linkedin.com/in/silvia-salatino-a0763335), [Matt Clark](https://www.nhm.ac.uk/our-science/departments-and-staff/staff-directory/matt-clark.html), [Raju Misra](https://www.linkedin.com/in/raju-misra-85b4558)
 
 
 ## Contributions and Support
