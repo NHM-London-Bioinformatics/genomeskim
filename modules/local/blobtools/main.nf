@@ -8,10 +8,10 @@ process BLOBTOOLS {
         'genomehubs/blobtoolkit:4.3.11' }"
 
     input:
-        tuple val(meta), path(contig)
-        tuple val(metablast), path(blastn)
-        tuple val(metamap), path(bam)
-        path(taxdump)
+        tuple val(meta),       path(contig)
+        tuple val(metablast),  path(blastn)
+        tuple val(metamap),    path(bam)
+        tuple val(metataxdump, path(taxdump)
 
     output:
         tuple val(meta), path('*_summary.tsv'), emit: table

@@ -2,15 +2,17 @@
 // Validate and filter organelle contigs
 //
 
-include { BLAST_BLASTN     } from '../../modules/nf-core/blast/blastn'
-include { MINIMAP2_ALIGN   } from '../../modules/nf-core/minimap2/align'
-include { BLOBTOOLS        } from '../../modules/local/blobtools'
+include { BLAST_BLASTN           } from '../../modules/nf-core/blast/blastn'
+include { MINIMAP2_ALIGN         } from '../../modules/nf-core/minimap2/align'
+include { BLOBTOOLS              } from '../../modules/local/blobtools'
+include { UNTAR as UNTAR_TAXDUMP } from '../../modules/nf-core/untar'
 
 workflow ORGANELLE_VALIDATION {
     take:
         ch_reads
         ch_contigsin
         ch_blastdbpath
+        ch_taxdump
         params
 
     main:
@@ -25,7 +27,6 @@ workflow ORGANELLE_VALIDATION {
         //
         // MODULE: BLASTN
         //
-
         BLAST_BLASTN(
             ch_contigssplit.contigs4blast,
             ch_blastdbpath
@@ -45,12 +46,16 @@ workflow ORGANELLE_VALIDATION {
         )
         ch_validation_versions = ch_validation_versions.mix(MINIMAP2_ALIGN.out.versions)
 
+        //
         // MODULE: BLOBTOOLS
+        //
+        UNTAR_TAXDUMP(ch_taxdump)
+
         BLOBTOOLS(
             ch_contigssplit.contigs4blob,
             BLAST_BLASTN.out.txt,
             MINIMAP2_ALIGN.out.bam,
-            params.taxdumppath
+            UNTAR_TAXDUMP.out.untar
         )
         ch_validation_versions = ch_validation_versions.mix(BLOBTOOLS.out.versions)
 

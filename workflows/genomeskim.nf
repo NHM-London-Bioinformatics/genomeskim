@@ -70,6 +70,7 @@ workflow GENOMESKIM {
     take:
     ch_samplesheet
     ch_mitos_ref
+    ch_taxdump
 
     main:
     // Create an empty channel to record software versions
@@ -166,6 +167,7 @@ workflow GENOMESKIM {
             ch_cleanreads.mapreads,
             ch_contigs.contigs4validation,
             Channel.value( [ [:], params.blastdbpath ] ),
+            ch_taxdump,
             params
         )
         ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)

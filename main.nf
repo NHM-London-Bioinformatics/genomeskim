@@ -78,7 +78,8 @@ workflow {
     //
     NFCORE_GENOMESKIM (
         PIPELINE_INITIALISATION.out.samplesheet,
-        PIPELINE_INITIALISATION.out.mitos_ref
+        PIPELINE_INITIALISATION.out.mitos_ref,
+        PIPELINE_INITIALISATION.out.taxdump
     )
 
     //

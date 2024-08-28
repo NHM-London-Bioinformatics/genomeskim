@@ -126,11 +126,21 @@ workflow PIPELINE_INITIALISATION {
             ] )
         }
 
+    ch_taxdump = Channel.empty()
+
+    if (!params.skip_validation) {
+        ch_taxdump = Channel.value( [
+            [id:'NCBItaxdump'],
+            file('https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz')
+            ] )
+    }
+
 
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
     mitos_ref   = ch_mitos_ref
+    taxdump     = ch_taxdump
 }
 
 /*
@@ -197,12 +207,12 @@ def validateInputParameters() {
         error("You've used an \"add_\" action for --getorganelle_ref_action, but this requires --organellerefs and/or --gofetch_taxon")
     }
 
-    if ( !params.skip_validation && ! ( params.blastdbpath && params.taxdumppath ) ){
-        error("Both --blastdbpath and --taxdumppath are required for validation")
+    if ( !params.skip_validation && !params.blastdbpath ){
+        error("Missing --blastdbpath: this is required for validation")
     }
 
-    if ( params.skip_validation && ( params.blastdbpath || params.taxdumppath) ){
-        error("When skipping validation using --skip_validation, neither --blastdbpath or --taxdumppath are needed")
+    if ( params.skip_validation && params.blastdbpath ){
+        error("When skipping validation using --skip_validation, --blastdbpath is not needed")
     }
 
     if ( !params.skip_annotation && ! ( params.mitos_geneticcode && params.mitos_refdbid ) ){

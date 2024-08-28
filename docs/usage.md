@@ -28,7 +28,7 @@ The pipeline can combine any of the GetOrganelle default, File, or Fetched refer
 
 **nfcore/genomeskim** performs a taxonomic and coverage estimation of assembled organelle contigs by default, for use in validation. A BLAST search against a suitable database is used to assign taxonomy to the contigs, and reads are mapped against the contigs to estimate coverage, with the outputs of both collated by BlobToolKit.
 
-If validation is required, you must supply a path to a BLAST database to `--blastdbpath`, against which the contigs will be searched. This can either be a local copy of an NCBI database such as nt, nr or refseq, or a custom database. If a custome database, it must have been created using the `-taxid_map` argument of `makeblastdb` to map NCBI taxids to entries. A curated database comprising your taxon of interest AND a selection of potential contaminants is likely to be much faster than using local copies of NCBI databases. You must also supply a path to `--taxdumppath` that is a directory containing the [NCBI taxdump files](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/) - see the [readme](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_readme.txt).
+If validation is required, you must supply a path to a BLAST database to `--blastdbpath`, against which the contigs will be searched. This can either be a local copy of an NCBI database such as nt, nr or refseq, or a custom database. If a custome database, it must have been created using the `-taxid_map` argument of `makeblastdb` to map NCBI taxids to entries. A curated database comprising your taxon of interest AND a selection of potential contaminants is likely to be much faster than using local copies of NCBI databases.
 
 This step can be skipped using `--skip_validation`.
 
@@ -81,10 +81,9 @@ nextflow run nf-core/genomeskim \
    --getorganelle_genometype animal_mt \
    --mitos_geneticcode 5 \
    --mitos_refdbid refseq89m \
-   --blastdbpath blast/nt/ \
-   --taxdumppath blast/taxdump/
+   --blastdbpath blast/nt/
 ```
-The user has specified the genetic code for insect mitochondria (5), one of the six available reference databases for MITOS annotation, and paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+The user has specified the genetic code for insect mitochondria (5), one of the six available reference databases for MITOS annotation, and the path to a local copy of NCBI nt. This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 This is a different example command for running the pipeline on a set of plant samples using GoFetch to retrieve reference sequences and combine these with the default GetOrganelle databases:
 ```bash
@@ -98,10 +97,9 @@ nextflow run nf-core/genomeskim \
    --gofetch_entrezemail plantlover@kew.org.uk \
    --getorganelle_ref_action add_both \
    --skip_annotation \
-   --blastdbpath blast/nt/ \
-   --taxdumppath blast/taxdump/
+   --blastdbpath blast/nt/
 ```
-The user has skipped annotation as chloroplast annotation is not currently available, and supplied paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
+The user has skipped annotation as chloroplast annotation is not currently available, and supplied the path to a local copy of NCBI nt. This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
 
 Here's a final example command for running the pipeline on a set of fungal samples, supplying a genbank flat file comprising reference sequences - by default these will be used instead of the default GetOrganelle databases:
 ```bash
@@ -113,10 +111,9 @@ nextflow run nf-core/genomeskim \
    --organellrefs psilocybe_refs.gb \
    --mitos_geneticcode 4 \
    --mitos_refdbid refseq63f \
-   --blastdbpath blast/hymenogastraceae_db/ \
-   --taxdumppath blast/taxdump/
+   --blastdbpath blast/hymenogastraceae_db/
 ```
-The user has skipped annotation as chloroplast annotation is not currently available, and supplied paths to a local copy of NCBI nt and taxdump. This will launch the pipeline with the `conda` configuration profile. See below for more information about profiles.
+The user has skipped annotation as chloroplast annotation is not currently available, and supplied the path to a local copy of NCBI nt. This will launch the pipeline with the `conda` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
