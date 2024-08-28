@@ -130,7 +130,7 @@ workflow PIPELINE_INITIALISATION {
     if (!params.skip_validation) {
         ch_taxdump = Channel.value( [
             [id:'NCBItaxdump'],
-            file('https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz')
+            file('https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz')
             ] )
     }
 

@@ -31,7 +31,7 @@ process JELLYFISH {
 
         jellyfish histo \\
             -t $task.cpus \\
-            ptilo.jf > ${prefix}.histo
+            ${prefix}.jf > ${prefix}.histo
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

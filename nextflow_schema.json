@@ -110,7 +110,7 @@
                     "type": "string",
                     "default": "refseq",
                     "enum": ["refseq", "genbank"],
-                    "description": "Database to search, must be one of \"genbank\" or \"refseq\" (default)"
+                    "description": "Database to search"
                 },
                 "gofetch_minn": {
                     "type": "integer",
@@ -166,14 +166,14 @@
                 },
                 "getorganelle_wordsize": {
                     "type": "number",
-                    "description": "The word size for GetOrganelle. Default: auto-estimated by GetOrganelle",
+                    "description": "The word size for GetOrganelle, auto-estimated by GetOrganelle if not supplied",
                     "help_text": "For more details, see https://github.com/Kinggerm/GetOrganelle?tab=readme-ov-file#starting-from-reads",
                     "minimum": 0
                 },
                 "getorganelle_kmers": {
                     "type": "string",
                     "default": "21,55,85,115",
-                    "description": "Kmer(s) to use for assembly with SPAdes within GetOrganelle. Default: 21,55,85,115",
+                    "description": "Kmer(s) to use for assembly with SPAdes within GetOrganelle",
                     "help_text": "One or several kmers should be supplied, separated by commas. Multiple kmers are recommended, see https://github.com/Kinggerm/GetOrganelle?tab=readme-ov-file#starting-from-reads for more information.",
                     "pattern": "^\\d+(?:,\\d+)*$"
                 },
@@ -186,7 +186,7 @@
                 "getorganelle_maxreads": {
                     "type": "integer",
                     "fa_icon": "fas fa-caret-up",
-                    "description": "Maximum number of reads to use from inputs. Default: no limit"
+                    "description": "Maximum number of reads to use from inputs, no limit if not supplied"
                 },
                 "getorganelle_ref_action": {
                     "type": "string",
@@ -263,18 +263,18 @@
                 "genomestats_kmer": {
                     "type": "integer",
                     "default": 21,
-                    "description": "K-mer length for kmer counting. Default: 21",
+                    "description": "K-mer length for kmer counting",
                     "help_text": "Passed to the -m option in Jellyfish2 and the -k option in Genomescope2"
                 },
                 "jellyfish_s": {
                     "type": "string",
                     "default": "1G",
-                    "description": "Initial hash size for jellyfish2. Default: 1G"
+                    "description": "Initial hash size for jellyfish2"
                 },
                 "genomescope2_ploidy": {
                     "type": "integer",
                     "default": 2,
-                    "description": "Ploidy for Genomescope2 to use. Default: 2",
+                    "description": "Ploidy for Genomescope2 to use",
                     "minimum": 1,
                     "maximum": 6
                 }
