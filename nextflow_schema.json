@@ -64,14 +64,14 @@
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The percentage of bases that may be unqualified to retain a read",
-                    "default": 100,
+                    "default": 100.0,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nBy default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads. Decrease this value to perform quality filtering."
                 },
                 "fastp_quality_filter_phred": {
                     "type": "number",
                     "fa_icon": "fas fa-filter",
                     "description": "The minimum phred score to qualify a base",
-                    "default": 15,
+                    "default": 15.0,
                     "help_text": "Passed through to `fastp --unqualified_percent_limit`, see https://github.com/OpenGene/fastp#quality-filter\n\nNote that this parameter has no effect if --fastp_quality_filter_pclim is set to 100, the default. Thus by default, no quality filtering is done, as recommended for getorganelle inputs, see https://github.com/Kinggerm/GetOrganelle#starting-from-reads."
                 },
                 "fastp_length_filter_min": {
@@ -79,7 +79,7 @@
                     "fa_icon": "fas fa-filter",
                     "description": "Minimum read length to be retained",
                     "help_text": "Passed through to `fastp --length_required`, see https://github.com/OpenGene/fastp#length-filter",
-                    "default": 15
+                    "default": 15.0
                 }
             },
             "help_text": "Parameters for removing trimming adapter sequences, quality filtering and length filtering.",
@@ -220,12 +220,6 @@
                     "format": "directory-path",
                     "description": "Path to a directory containing a BLAST-format reference database",
                     "help_text": "The reference database must have been created using the -taxid_map to map NCBI taxids to entries. Local copies of nt, nr or refseq will work, but may be quite slow, better to use a curated database comprising your taxon of interest AND a selection of potential contaminants"
-                },
-                "taxdumppath": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to a local copy of the NCBI taxdump directory",
-                    "help_text": "See https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_readme.txt"
                 }
             }
         },
@@ -508,7 +502,7 @@
     "properties": {
         "pipelines_testdata_base_path": {
             "type": "string",
-            "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+            "default": "https://raw.githubusercontent.com/tjcreedy/test-datasets/",
             "hidden": true
         }
     }
