@@ -108,8 +108,7 @@ workflow PIPELINE_INITIALISATION {
         params.multiqc_config,
         params.organellerefs,
         params.fastp_adapter_fasta,
-        params.blastdbpath,
-        params.taxdumppath
+        params.blastdbpath
         ]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 

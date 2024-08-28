@@ -36,6 +36,7 @@ workflow NFCORE_GENOMESKIM {
     take:
     samplesheet // channel: samplesheet read in from --input
     mitos_ref
+    taxdump
     main:
 
     //
@@ -43,7 +44,8 @@ workflow NFCORE_GENOMESKIM {
     //
     GENOMESKIM (
         samplesheet,
-        mitos_ref
+        mitos_ref,
+        taxdump
     )
 
     emit:

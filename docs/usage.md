@@ -150,7 +150,6 @@ gofetch_entrezemail: plantlover@kew.org.uk
 getorganelle_ref_action: add_both
 skip_annotation
 blastdbpath: blast/nt/
-taxdumppath: blast/taxdump/
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
