@@ -12,11 +12,11 @@ process MITOS {
         tuple val(dbmeta), path(db)
 
     output:
-        tuple val(meta), path("${meta.id}.bed"), emit: bed
-        tuple val(meta), path("${meta.id}.gff"), emit: gff
-        tuple val(meta), path("${meta.id}.fas"), emit: fas
-        tuple val(meta), path("${meta.id}.faa"), emit: faa
-        path "versions.yml"                       , emit: versions
+        tuple val(meta), path("catoutput/${meta.id}.bed"), emit: bed
+        tuple val(meta), path("catoutput/${meta.id}.gff"), emit: gff
+        tuple val(meta), path("catoutput/${meta.id}.fas"), emit: fas
+        tuple val(meta), path("catoutput/${meta.id}.faa"), emit: faa
+        path "versions.yml"                              , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
@@ -27,17 +27,30 @@ process MITOS {
         """
         args=\$(grep -q "circular" $contig && echo "$args" || echo "$args --linear")
 
-        mkdir output
+        mkdir catoutput
+        midkr mitosoutput
 
         runmitos.py \
             --input $contig \
-            --outdir output/ \
+            --outdir mitosoutput/ \
             --refdir ./ \
             --refseqver $db \
             \$args \
             &> mitos.log
 
-        for f in output/result*; do mv \$f ${prefix}.\${f##*.}; done
+        dirs='/'
+        if [! -f mitosoutput/result.mitos ]
+        then
+            dirs=\$(ls mitosoutput | sed "s:\$:/:")
+        fi
+        for d in dirs
+        do
+            f="mitosoutput/\${d}result"
+            for ext in bed faa fas geneorder gff mitos seq
+                cat \$f.\$ext >> catoutput/${prefix}.\$ext
+            done
+            cp \$f.png catoutput/${prefix}_\${d%/}.png
+        done
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
@@ -49,11 +62,11 @@ process MITOS {
         def args = task.ext.args ?: ''
         def prefix = "${meta.id}"
         """
-        mkdir output
+        mkdir catoutput
 
         for i in bed gff fas faa;
         do
-            touch $prefix.\$i
+            touch catoutput/$prefix.\$i
         done
 
         cat <<-END_VERSIONS > versions.yml
