@@ -252,6 +252,10 @@
                     "description": "Specify one of six MITOS2 reference databases",
                     "help_text": "See https://dx.doi.org/10.5281/zenodo.4284483",
                     "enum": ["refseq63f", "refseq63m", "refseq63o", "refseq89f", "refseq89m", "refseq89o"]
+                },
+                "mitos_save_alloutputs": {
+                    "type": "boolean",
+                    "description": "Save MITOS blast and mitfi outputs in outdir"
                 }
             }
         },

@@ -28,7 +28,7 @@ process MITOS {
         args=\$(grep -q "circular" $contig && echo "$args" || echo "$args --linear")
 
         mkdir catoutput
-        midkr mitosoutput
+        mkdir mitosoutput
 
         runmitos.py \
             --input $contig \
@@ -39,7 +39,7 @@ process MITOS {
             &> mitos.log
 
         dirs='/'
-        if [! -f mitosoutput/result.mitos ]
+        if [ ! -f mitosoutput/result.mitos ]
         then
             dirs=\$(ls mitosoutput | sed "s:\$:/:")
         fi
@@ -47,6 +47,7 @@ process MITOS {
         do
             f="mitosoutput/\${d}result"
             for ext in bed faa fas geneorder gff mitos seq
+            do
                 cat \$f.\$ext >> catoutput/${prefix}.\$ext
             done
             cp \$f.png catoutput/${prefix}_\${d%/}.png
