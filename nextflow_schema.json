@@ -220,6 +220,11 @@
                     "format": "directory-path",
                     "description": "Path to a directory containing a BLAST-format reference database",
                     "help_text": "The reference database must have been created using the -taxid_map to map NCBI taxids to entries. Local copies of nt, nr or refseq will work, but may be quite slow, better to use a curated database comprising your taxon of interest AND a selection of potential contaminants"
+                },
+                "blastdbtargz": {
+                    "type": "string",
+                    "description": "Path to a tar.gz directory containing a BLAST-format reference database",
+                    "help_text": "See --blastdbpath; this variable provides an alternative way of supplying the BLASTDB, for example from the web or if the db needs to be copied to the pipeline execution location."
                 }
             }
         },

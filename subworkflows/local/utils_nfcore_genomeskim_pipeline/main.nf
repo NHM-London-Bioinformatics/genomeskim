@@ -113,7 +113,7 @@ workflow PIPELINE_INITIALISATION {
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     //
-    // Stage any remote files
+    // Stage any files/paths
     //
 
     ch_mitos_ref = Channel.empty()
@@ -126,12 +126,27 @@ workflow PIPELINE_INITIALISATION {
         }
 
     ch_taxdump = Channel.empty()
+    ch_blastdb = Channel.empty()
 
     if (!params.skip_validation) {
-        ch_taxdump = Channel.value( [
+        // Stage taxdump
+        ch_taxdump = Channel.value([
             [id:'NCBItaxdump'],
             file('https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz')
-            ] )
+        ])
+        // Stage blastdb
+        if (params.blastdbpath) {
+            ch_blastdb = Channel.value([
+                [id:'BLASTDBPATH'],
+                file(params.blastdbpath, checkIfExists: true, type: 'dir')
+            ])
+        } else {
+            ch_blastdb = Channel.value([
+                [id:'BLASTDBTARGZ'],
+                file(params.blastdbtargz)
+            ])
+        }
+
     }
 
 
@@ -140,6 +155,7 @@ workflow PIPELINE_INITIALISATION {
     versions    = ch_versions
     mitos_ref   = ch_mitos_ref
     taxdump     = ch_taxdump
+    blastdb     = ch_blastdb
 }
 
 /*
@@ -206,11 +222,11 @@ def validateInputParameters() {
         error("You've used an \"add_\" action for --getorganelle_ref_action, but this requires --organellerefs and/or --gofetch_taxon")
     }
 
-    if ( !params.skip_validation && !params.blastdbpath ){
+    if ( !params.skip_validation && ! ( params.blastdbpath || params.blastdbtargz )){
         error("Missing --blastdbpath: this is required for validation")
     }
 
-    if ( params.skip_validation && params.blastdbpath ){
+    if ( params.skip_validation && ( params.blastdbpath || params.blastdbtargz )){
         error("When skipping validation using --skip_validation, --blastdbpath is not needed")
     }
 

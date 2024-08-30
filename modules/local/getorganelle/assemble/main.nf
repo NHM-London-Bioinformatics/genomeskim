@@ -14,7 +14,7 @@ process GETORGANELLE {
 
     output:
         //TODO: MULTIQC doesn't support getorganelle
-        tuple val(meta), path("output/*1.1.path_sequence.fasta.gz")  , emit: contigs
+        tuple val(meta), path("output/*.path_sequence.fasta")  , emit: contigs
         tuple val(meta), path("output/extended_*_paired.fq.gz")      , emit: pairedreads
         tuple val(meta), path("output/extended_*_unpaired.fq.gz")    , emit: unpairedreads
         tuple val(meta), path("getorganelle.log")                    , emit: log
@@ -43,7 +43,7 @@ process GETORGANELLE {
 
         rm seeds.fasta labels.fasta
 
-        gzip output/*.fasta
+        #gzip output/*.fasta
         gzip output/*.fq
 
         cat <<-END_VERSIONS > versions.yml
@@ -58,7 +58,7 @@ process GETORGANELLE {
         """
         mkdir output
 
-        touch output/contigs1.1.path_sequence.fasta.gz
+        touch output/contigs.path_sequence.fasta#.gz
         touch output/extended_{1,2}_paired.fq.gz
         touch output/extended_{1,2}_unpaired.fq.gz
         touch getorganelle.log

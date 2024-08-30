@@ -34,9 +34,10 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_geno
 workflow NFCORE_GENOMESKIM {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
-    mitos_ref
-    taxdump
+        samplesheet // channel: samplesheet read in from --input
+        mitos_ref
+        taxdump
+        blastdb
     main:
 
     //
@@ -45,11 +46,12 @@ workflow NFCORE_GENOMESKIM {
     GENOMESKIM (
         samplesheet,
         mitos_ref,
-        taxdump
+        taxdump,
+        blastdb
     )
 
     emit:
-    multiqc_report = GENOMESKIM.out.multiqc_report // channel: /path/to/multiqc_report.html
+        multiqc_report = GENOMESKIM.out.multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 /*
@@ -81,7 +83,8 @@ workflow {
     NFCORE_GENOMESKIM (
         PIPELINE_INITIALISATION.out.samplesheet,
         PIPELINE_INITIALISATION.out.mitos_ref,
-        PIPELINE_INITIALISATION.out.taxdump
+        PIPELINE_INITIALISATION.out.taxdump,
+        PIPELINE_INITIALISATION.out.blastdb
     )
 
     //

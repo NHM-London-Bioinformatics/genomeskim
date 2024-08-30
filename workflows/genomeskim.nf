@@ -31,9 +31,9 @@ include { JELLYFISH                   } from '../modules/local/jellyfish'
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 
-include { PREPARE_REFS            } from '../subworkflows/local/prepare_refs'
-include { ORGANELLE_VALIDATION   } from '../subworkflows/local/organelle_validation'
-include { ANNOTATION              } from '../subworkflows/local/annotation'
+include { PREPARE_REFS } from '../subworkflows/local/prepare_refs'
+include { VALIDATION   } from '../subworkflows/local/validation'
+include { ANNOTATION   } from '../subworkflows/local/annotation'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,9 +68,10 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_geno
 workflow GENOMESKIM {
 
     take:
-    ch_samplesheet
-    ch_mitos_ref
-    ch_taxdump
+        ch_samplesheet
+        ch_mitos_ref
+        ch_taxdump
+        ch_blastdb
 
     main:
     // Create an empty channel to record software versions
@@ -132,9 +133,9 @@ workflow GENOMESKIM {
         PREPARE_REFS.out.golabels
     )
 
-    // Split out and decompress contigs
+    // Split to multiple channels
     // TODO rename contigs with input name
-    ch_contigs = GETORGANELLE.out.contigs.splitFasta(file: true, decompress: true)
+    ch_contigs = GETORGANELLE.out.contigs //.splitFasta(file: true, decompress: true) //Split and decompress not needed?
         .multiMap { i -> contigs4validation: contigs4annotation : i }
 
     // Split the input reads based on the files comprising the paired reads and unpaired reads used by getorganelle
@@ -163,14 +164,14 @@ workflow GENOMESKIM {
     //
 
     if ( !params.skip_validation ) {
-        ORGANELLE_VALIDATION(
+        VALIDATION(
             ch_cleanreads.mapreads,
             ch_contigs.contigs4validation,
-            Channel.value( [ [:], params.blastdbpath ] ),
             ch_taxdump,
+            ch_blastdb,
             params
         )
-        ch_versions = ch_versions.mix(ORGANELLE_VALIDATION.out.versions)
+        ch_versions = ch_versions.mix(VALIDATION.out.versions)
     }
 
     //
